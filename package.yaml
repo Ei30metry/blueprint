@@ -11,16 +11,30 @@ extra-source-files:
 - CHANGELOG.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
+synopsis:            A Tool for seeing all the underlying blocks of functions
+category:            Development
 
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/blueprint#readme>
+description:         Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
 
 dependencies:
 - base >= 4.7 && < 5
+- text
+- bytestring
+- colour
+- fmt
+- containers
+- transformers
+- mtl
+- hashable
+- extra
+- cereal
+- optparse-applicative
+- vector
+- lens
+- ghc-lib
+- ghc-lib-parser
+- ghc-source-gen
+- ormolu
 
 
 default-extensions:

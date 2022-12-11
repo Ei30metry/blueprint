@@ -6,7 +6,7 @@ cabal-version: 1.12
 
 name:           blueprint
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/blueprint#readme>
+description:    Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
 homepage:       https://github.com/Ei30metry/blueprint#readme
 bug-reports:    https://github.com/Ei30metry/blueprint/issues
 author:         Artin Ghasivand
@@ -47,6 +47,23 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , cereal
+    , colour
+    , containers
+    , extra
+    , fmt
+    , ghc-lib
+    , ghc-lib-parser
+    , ghc-source-gen
+    , hashable
+    , lens
+    , mtl
+    , optparse-applicative
+    , ormolu
+    , text
+    , transformers
+    , vector
   default-language: Haskell2010
 
 executable blueprint-exe
@@ -73,6 +90,23 @@ executable blueprint-exe
   build-depends:
       base >=4.7 && <5
     , blueprint
+    , bytestring
+    , cereal
+    , colour
+    , containers
+    , extra
+    , fmt
+    , ghc-lib
+    , ghc-lib-parser
+    , ghc-source-gen
+    , hashable
+    , lens
+    , mtl
+    , optparse-applicative
+    , ormolu
+    , text
+    , transformers
+    , vector
   default-language: Haskell2010
 
 test-suite blueprint-test
@@ -100,4 +134,21 @@ test-suite blueprint-test
   build-depends:
       base >=4.7 && <5
     , blueprint
+    , bytestring
+    , cereal
+    , colour
+    , containers
+    , extra
+    , fmt
+    , ghc-lib
+    , ghc-lib-parser
+    , ghc-source-gen
+    , hashable
+    , lens
+    , mtl
+    , optparse-applicative
+    , ormolu
+    , text
+    , transformers
+    , vector
   default-language: Haskell2010

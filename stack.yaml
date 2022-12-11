@@ -17,8 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/3.yaml
+resolver: lts-20.3 
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -31,37 +30,35 @@ resolver:
 #   - wai
 packages:
 - .
-# Dependency packages to be pulled from upstream that are not in the resolver.
-# These entries can reference officially published versions as well as
-# forks / in-progress versions pinned to a git hash. For example:
-#
-# extra-deps:
-# - acme-missiles-0.3
-# - git: https://github.com/commercialhaskell/stack.git
-#   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
-#
-# extra-deps: []
 
-# Override default flag values for local packages and extra-deps
-# flags: {}
+  # extra-deps:
 
-# Extra package databases containing global packages
-# extra-package-dbs: []
+  # - acme-missiles-0.3
+  # - git: https://github.com/commercialhaskell/stack.git
+  #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
+  #
+  # extra-deps: []
 
-# Control whether we use the GHC we find on the path
-# system-ghc: true
-#
-# Require a specific version of stack, using version ranges
-# require-stack-version: -any # Default
-# require-stack-version: ">=2.9"
-#
-# Override the architecture used by stack, especially useful on Windows
-# arch: i386
-# arch: x86_64
-#
-# Extra directories used by stack for building
-# extra-include-dirs: [/path/to/dir]
-# extra-lib-dirs: [/path/to/dir]
-#
-# Allow a newer minor version of GHC than the snapshot specifies
-# compiler-check: newer-minor
+  # override default flag values for local packages and extra-deps
+  # flags: {}
+
+  # extra package databases containing global packages
+  # extra-package-dbs: []
+
+  # control whether we use the ghc we find on the path
+  # system-ghc: true
+  #
+  # require a specific version of stack, using version ranges
+  # require-stack-version: -any # default
+  # require-stack-version: ">=2.9"
+  #
+  # override the architecture used by stack, especially useful on windows
+  # arch: i386
+  # arch: x86_64
+  #
+  # extra directories used by stack for building
+  # extra-include-dirs: [/path/to/dir]
+  # extra-lib-dirs: [/path/to/dir]
+  #
+  # allow a newer minor version of ghc than the snapshot specifies
+  # compiler-check: newer-minor

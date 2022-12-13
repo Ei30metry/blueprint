@@ -6,7 +6,9 @@ cabal-version: 1.12
 
 name:           blueprint
 version:        0.1.0.0
+synopsis:       A CLI Tool for seeing all the underlying blocks of functions
 description:    Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
+category:       Development
 homepage:       https://github.com/Ei30metry/blueprint#readme
 bug-reports:    https://github.com/Ei30metry/blueprint/issues
 author:         Artin Ghasivand
@@ -25,7 +27,11 @@ source-repository head
 
 library
   exposed-modules:
+      CLI
+      Compute
       Lib
+      Output
+      Types
   other-modules:
       Paths_blueprint
   hs-source-dirs:
@@ -44,7 +50,7 @@ library
       KindSignatures
       StandaloneKindSignatures
       RoleAnnotations
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fforce-recomp
   build-depends:
       base >=4.7 && <5
     , bytestring
@@ -86,7 +92,7 @@ executable blueprint-exe
       KindSignatures
       StandaloneKindSignatures
       RoleAnnotations
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fforce-recomp -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , blueprint
@@ -130,7 +136,7 @@ test-suite blueprint-test
       KindSignatures
       StandaloneKindSignatures
       RoleAnnotations
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fforce-recomp -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , blueprint

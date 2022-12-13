@@ -11,7 +11,7 @@ extra-source-files:
 - CHANGELOG.md
 
 # Metadata used when publishing your package
-synopsis:            A Tool for seeing all the underlying blocks of functions
+synopsis:            A CLI Tool for seeing all the underlying blocks of functions
 category:            Development
 
 description:         Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
@@ -62,6 +62,7 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
+- -fforce-recomp
 
 library:
   source-dirs: src

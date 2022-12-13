@@ -1,1 +1,2 @@
-# blueprint: A Haskell program to let you see all the functions used in your definitions that uses the GHC API
+# blueprint
+A program for Haskell code that let's you see and search the building blocks of your functions.

@@ -6,7 +6,7 @@ cabal-version: 1.12
 
 name:           blueprint
 version:        0.1.0.0
-synopsis:       A CLI Tool for seeing all the underlying blocks of functions
+synopsis:       A CLI Tool for seeing all the underlying blocks of functions and structures
 description:    Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
 category:       Development
 homepage:       https://github.com/Ei30metry/blueprint#readme

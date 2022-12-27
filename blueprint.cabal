@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -63,6 +63,7 @@ library
     , ghc-lib-parser
     , ghc-source-gen
     , hashable
+    , haskell-src-exts
     , lens
     , mtl
     , optparse-applicative
@@ -106,6 +107,7 @@ executable blueprint-exe
     , ghc-lib-parser
     , ghc-source-gen
     , hashable
+    , haskell-src-exts
     , lens
     , mtl
     , optparse-applicative
@@ -150,6 +152,7 @@ test-suite blueprint-test
     , ghc-lib-parser
     , ghc-source-gen
     , hashable
+    , haskell-src-exts
     , lens
     , mtl
     , optparse-applicative

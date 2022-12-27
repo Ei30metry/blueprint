@@ -35,7 +35,7 @@ dependencies:
 - ghc-lib-parser
 - ghc-source-gen
 - ormolu
-
+- haskell-src-exts
 
 default-extensions:
   - MultiParamTypeClasses

@@ -29,7 +29,6 @@ library
   exposed-modules:
       CLI
       Compute
-      Lib
       Output
       Types
   other-modules:
@@ -53,27 +52,23 @@ library
       RoleAnnotations
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      ForestStructures
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , bytestring
     , cereal
     , colour
     , containers
-    , dual-tree
     , extra
     , fgl
     , fmt
     , ghc-lib
-    , ghc-lib-parser
-    , ghc-lib-parser-ex
-    , ghc-syntax-highlighter
+    , ghc-paths
     , lens
     , monad-par
-    , monad-par-extras
     , mtl
     , optparse-applicative
     , parallel
     , prettyprinter
+    , prettyprinter-ansi-terminal
     , text
     , transformers
     , vector
@@ -102,28 +97,24 @@ executable blueprint-exe
       RoleAnnotations
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ForestStructures
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , blueprint
     , bytestring
     , cereal
     , colour
     , containers
-    , dual-tree
     , extra
     , fgl
     , fmt
     , ghc-lib
-    , ghc-lib-parser
-    , ghc-lib-parser-ex
-    , ghc-syntax-highlighter
+    , ghc-paths
     , lens
     , monad-par
-    , monad-par-extras
     , mtl
     , optparse-applicative
     , parallel
     , prettyprinter
+    , prettyprinter-ansi-terminal
     , text
     , transformers
     , vector
@@ -154,29 +145,25 @@ test-suite blueprint-test
       RoleAnnotations
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ForestStructures
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , blueprint
     , bytestring
     , cereal
     , colour
     , containers
-    , dual-tree
     , extra
     , fgl
     , fmt
     , ghc-lib
-    , ghc-lib-parser
-    , ghc-lib-parser-ex
-    , ghc-syntax-highlighter
+    , ghc-paths
     , hedgehog
     , lens
     , monad-par
-    , monad-par-extras
     , mtl
     , optparse-applicative
     , parallel
     , prettyprinter
+    , prettyprinter-ansi-terminal
     , tasty
     , tasty-golden
     , tasty-hedgehog

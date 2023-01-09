@@ -23,23 +23,19 @@ dependencies:
 - colour
 - fmt
 - containers
-- transformers
 - mtl
+- transformers
 - extra
 - cereal
 - optparse-applicative
 - vector
 - lens
 - ghc-lib
-- ghc-lib-parser
-- ghc-lib-parser-ex
-- dual-tree
+- ghc-paths
 - fgl
-- ForestStructures
-- ghc-syntax-highlighter
 - prettyprinter
+- prettyprinter-ansi-terminal
 - monad-par
-- monad-par-extras
 - parallel
 
 default-extensions:

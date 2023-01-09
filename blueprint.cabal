@@ -6,7 +6,7 @@ cabal-version: 1.12
 
 name:           blueprint
 version:        0.1.0.0
-synopsis:       A CLI Tool for seeing all the underlying blocks of functions and structures
+synopsis:       A CLI Tool for seeing all the underlying blocks of functions
 description:    Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
 category:       Development
 homepage:       https://github.com/Ei30metry/blueprint#readme
@@ -47,27 +47,33 @@ library
       TypeApplications
       DataKinds
       PolyKinds
+      DeriveGeneric
       KindSignatures
       StandaloneKindSignatures
       RoleAnnotations
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fforce-recomp
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      ForestStructures
+    , base >=4.7 && <5
     , bytestring
     , cereal
     , colour
     , containers
+    , dual-tree
     , extra
+    , fgl
     , fmt
     , ghc-lib
     , ghc-lib-parser
-    , ghc-source-gen
-    , hashable
-    , haskell-src-exts
+    , ghc-lib-parser-ex
+    , ghc-syntax-highlighter
     , lens
+    , monad-par
+    , monad-par-extras
     , mtl
     , optparse-applicative
-    , ormolu
+    , parallel
+    , prettyprinter
     , text
     , transformers
     , vector
@@ -90,28 +96,34 @@ executable blueprint-exe
       TypeApplications
       DataKinds
       PolyKinds
+      DeriveGeneric
       KindSignatures
       StandaloneKindSignatures
       RoleAnnotations
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fforce-recomp -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      ForestStructures
+    , base >=4.7 && <5
     , blueprint
     , bytestring
     , cereal
     , colour
     , containers
+    , dual-tree
     , extra
+    , fgl
     , fmt
     , ghc-lib
     , ghc-lib-parser
-    , ghc-source-gen
-    , hashable
-    , haskell-src-exts
+    , ghc-lib-parser-ex
+    , ghc-syntax-highlighter
     , lens
+    , monad-par
+    , monad-par-extras
     , mtl
     , optparse-applicative
-    , ormolu
+    , parallel
+    , prettyprinter
     , text
     , transformers
     , vector
@@ -119,8 +131,9 @@ executable blueprint-exe
 
 test-suite blueprint-test
   type: exitcode-stdio-1.0
-  main-is: Spec.hs
+  main-is: Tests.hs
   other-modules:
+      Test
       Paths_blueprint
   hs-source-dirs:
       test
@@ -135,28 +148,38 @@ test-suite blueprint-test
       TypeApplications
       DataKinds
       PolyKinds
+      DeriveGeneric
       KindSignatures
       StandaloneKindSignatures
       RoleAnnotations
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -fforce-recomp -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      ForestStructures
+    , base >=4.7 && <5
     , blueprint
     , bytestring
     , cereal
     , colour
     , containers
+    , dual-tree
     , extra
+    , fgl
     , fmt
     , ghc-lib
     , ghc-lib-parser
-    , ghc-source-gen
-    , hashable
-    , haskell-src-exts
+    , ghc-lib-parser-ex
+    , ghc-syntax-highlighter
+    , hedgehog
     , lens
+    , monad-par
+    , monad-par-extras
     , mtl
     , optparse-applicative
-    , ormolu
+    , parallel
+    , prettyprinter
+    , tasty
+    , tasty-golden
+    , tasty-hedgehog
     , text
     , transformers
     , vector

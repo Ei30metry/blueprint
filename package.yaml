@@ -11,7 +11,7 @@ extra-source-files:
 - CHANGELOG.md
 
 # Metadata used when publishing your package
-synopsis:            A CLI Tool for seeing all the underlying blocks of functions and structures
+synopsis:            A CLI Tool for seeing all the underlying blocks of functions
 category:            Development
 
 description:         Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
@@ -25,7 +25,6 @@ dependencies:
 - containers
 - transformers
 - mtl
-- hashable
 - extra
 - cereal
 - optparse-applicative
@@ -33,9 +32,15 @@ dependencies:
 - lens
 - ghc-lib
 - ghc-lib-parser
-- ghc-source-gen
-- ormolu
-- haskell-src-exts
+- ghc-lib-parser-ex
+- dual-tree
+- fgl
+- ForestStructures
+- ghc-syntax-highlighter
+- prettyprinter
+- monad-par
+- monad-par-extras
+- parallel
 
 default-extensions:
   - MultiParamTypeClasses
@@ -48,6 +53,7 @@ default-extensions:
   - TypeApplications
   - DataKinds
   - PolyKinds
+  - DeriveGeneric
   - KindSignatures
   - StandaloneKindSignatures
   - RoleAnnotations
@@ -62,7 +68,7 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
-- -fforce-recomp
+# - -fforce-recomp
 
 library:
   source-dirs: src
@@ -81,7 +87,7 @@ executables:
 
 tests:
   blueprint-test:
-    main:                Spec.hs
+    main:                Tests.hs
     source-dirs:         test
     ghc-options:
     - -threaded
@@ -89,3 +95,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - blueprint
+    - tasty
+    - hedgehog
+    - tasty-hedgehog
+    - tasty-golden

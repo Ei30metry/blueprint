@@ -12,25 +12,26 @@ import           Data.Foldable             ()
 import qualified Data.Map                  as M
 import           Data.Traversable          ()
 
-import           GHC.Driver.Main           ()
+import           GHC                       ( GhcRn, HsGroup (..),
+                                             RenamedSource )
+import           GHC.Driver.Main           ( hscTypecheckRename )
 import           GHC.Generics
+import           GHC.Types                 ()
 import           GHC.Types.Name            ()
-import           GHC.Types.Name.Cache      ()
-import           GHC.Types.Name.Occurrence ()
-import           GHC.Types.Name.Reader     ()
-import           GHC.Types.Name.Set        ()
 
 
 -- moduleToAST :: String -> p
--- parseToModuleDecleration :: String -> Module
+-- parseToModuleDecleration :: String -> a
+parseToModuleDecleration :: String -> RenamedSource
 parseToModuleDecleration = undefined
 
 searchImplementation :: a
 searchImplementation = undefined
 
 
-getNames :: a
-getNames = undefined
+-- NameSpace == Varname && NameSort == External ....
+lookupName :: a
+lookupName = undefined
 
 showImplementation :: a
 showImplementation = undefined

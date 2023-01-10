@@ -2,10 +2,7 @@ module Main (main) where
 
 import           Control.Monad.IO.Class ( liftIO )
 
-import           Data.List              ( takeWhile )
-
-import           GHC                    ( Backend (Interpreter),
-                                          DynFlags (backend),
+import           GHC                    ( Backend (LLVM), DynFlags (backend),
                                           GhcMonad (getSession),
                                           LoadHowMuch (LoadAllTargets),
                                           ParsedMod (parsedSource),
@@ -31,7 +28,7 @@ main = runGhc (Just libdir) $ do
   let fileModuleName = reverse $ takeWhile (/= '/') $ reverse $ take (length file - 3) file
   -- env <- getSession
   dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags { backend = Interpreter }
+  setSessionDynFlags $ dflags { backend = LLVM }
 
   target <- guessTarget file Nothing
   setTargets [target]
@@ -40,7 +37,8 @@ main = runGhc (Just libdir) $ do
 
   pmod <- parseModule modSum      -- ModuleSummary
   tmod <- typecheckModule pmod    -- TypecheckedSource
+  let rmod = tm_renamed_source tmod
 
   liftIO $ putStrLn $ banner "Renamed Module"
-  liftIO $ putStrLn $ showPprUnsafe ( tm_renamed_source tmod )
+  liftIO $ putStrLn $ showPprUnsafe rmod
   liftIO $ putStr "\n"

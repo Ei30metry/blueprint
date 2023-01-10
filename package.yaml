@@ -31,6 +31,7 @@ dependencies:
 - vector
 - lens
 - ghc-lib
+- ghc-prim
 - ghc-paths
 - fgl
 - prettyprinter

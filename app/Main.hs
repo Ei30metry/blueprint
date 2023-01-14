@@ -1,5 +1,7 @@
 module Main (main) where
 
+import           Compute                ( toHsGroup )
+
 import           Control.Monad.IO.Class ( liftIO )
 
 import           GHC                    ( Backend (LLVM), DynFlags (backend),

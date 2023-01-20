@@ -1,26 +1,10 @@
 module Types where
 
-import           Control.Lens
+
+data Entity a = FunctionE a
+              | DataTypeE a deriving (Show, Eq)
 
 
 
-data Entity = InstanceE
-            | FunctionE
-            | DataTypeE deriving (Show, Eq)
-
-
-
-newtype MultiSearch = MultiI [Entity] deriving (Show, Eq)
-
-
-data LocalScope (a :: Entity) where
-  LclScopeFunc :: LocalScope 'FunctionE
-
-
-data SearchEnv = SEnv { entity      :: Entity
-                      , localScope  :: Bool
+data SearchEnv = SEnv { entity      :: Entity String
                       , multiSearch :: Bool } deriving (Show, Eq)
-
-
-convertLocalScope :: LocalScope a -> Entity
-convertLocalScope LclScopeFunc = FunctionE

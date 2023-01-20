@@ -1,6 +1,6 @@
 module App where
 
-import           Types
+import           Types ( Entity, SEnv )
 
-mkEnv :: Params -> Env
-mkEnv = undefined
+-- mkEnv :: Params -> SEnv
+-- mkEnv = undefined

@@ -7,7 +7,7 @@ import           Options.Applicative ( Parser, argument, help, long, metavar,
 
 import           Text.Read           ( readMaybe )
 
-import           Types
+import           Types               ( SearchEnv )
 
 -- search for local Scope
 --local-scope
@@ -20,11 +20,7 @@ multiple:
   search for more than 1 data Type
 -}
 
-data SearchMode = MultiSearch [Entity]
-                | Search Entity deriving (Show, Eq)
-
-
-data Params = Params SearchMode FilePath deriving (Show, Eq)
+data Params = Params SearchEnv FilePath deriving (Show, Eq)
 
 
 -- mkParams :: Parser Params

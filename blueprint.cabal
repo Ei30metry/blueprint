@@ -46,6 +46,7 @@ library
       TypeOperators
       TypeApplications
       DataKinds
+      ViewPatterns
       PolyKinds
       DeriveGeneric
       KindSignatures
@@ -92,6 +93,7 @@ executable blueprint-exe
       TypeOperators
       TypeApplications
       DataKinds
+      ViewPatterns
       PolyKinds
       DeriveGeneric
       KindSignatures
@@ -141,6 +143,7 @@ test-suite blueprint-test
       TypeOperators
       TypeApplications
       DataKinds
+      ViewPatterns
       PolyKinds
       DeriveGeneric
       KindSignatures

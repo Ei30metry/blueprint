@@ -1,12 +1,14 @@
 module Compute (rnWithGlobalEnv) where
 
 
+import           App
+
 import           Control.Applicative        ()
 import           Control.Monad              ( join, mapM, (<=<), (>=>) )
 import           Control.Monad.Extra        ()
 import           Control.Monad.Trans        ( MonadTrans, lift, liftIO )
 import           Control.Monad.Trans.Class  ()
-import           Control.Monad.Trans.Reader ( ReaderT, ask, asks, local,
+import           Control.Monad.Trans.Reader ( ReaderT (..), ask, asks, local,
                                               mapReaderT, withReaderT )
 
 import           Data.Foldable              ()
@@ -40,6 +42,8 @@ import           GHC.Types.Name.Occurrence  ( lookupOccEnv )
 import           GHC.Types.Name.Reader      ( GlobalRdrElt (..),
                                               GlobalRdrEnv (..) )
 
+import           Types
+
 searchImplementation :: a
 searchImplementation = undefined
 
@@ -52,10 +56,10 @@ rnWithGlobalEnv = return . glbWithRenamed <=< typecheckModule
 
 -- NameSpace == Varname && NameSort == External ....
 -- lookupName :: GlobalRdrEnv -> String -> [Name]
-lookupName :: ReaderT GlobalRdrEnv Maybe Name -> String -> Maybe Name
+lookupName :: BluePrint GlobalRdrEnv Name -> String -> Maybe Name
 lookupName = undefined
 
-lookupManyNames :: [String] -> [Name]
+lookupManyNames :: [String] -> [Maybe Name]
 lookupManyNames = undefined
 
 -- toHsGroup = rnSrcDecls <=< fstM <=< findSplice . hsmodDecls . unLoc . pm_parsed_source

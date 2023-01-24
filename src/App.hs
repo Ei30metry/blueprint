@@ -1,6 +1,13 @@
 module App where
 
-import           Types ( Entity, SEnv )
+import           Control.Monad.Trans.Reader ( ReaderT (runReaderT) )
+import           Control.Monad.Trans.Writer ( WriterT (runWriterT) )
 
--- mkEnv :: Params -> SEnv
--- mkEnv = undefined
+import           Types                      ( Entity, SearchEnv )
+
+
+type BluePrint a b = ReaderT a Maybe b
+
+
+runBluePrint :: BluePrint a b -> Maybe b
+runBluePrint = undefined

@@ -10,6 +10,11 @@ There are 2 commands in Blueprint:
 - **function**
 - **type**
 
+
+
+## Usage 
+
+
 ## Example
 Assume we want to see the "blueprint" of our `parseMoodReports` function defined below. (with path "HERE") 
 
@@ -74,6 +79,15 @@ BOOM!
 .....
 ```
 
+## Installing pre-compiled binaries 
+
+## Building from source
+
+### Dependencies
+GHC (of course) 
+stack 
+
+
 
 ## The `function` command 
 Takes the function we want to pretty-print as an argument. 
@@ -93,7 +107,8 @@ takes the type we want to pretty-print as an argument.
 
 - `-c` or `--color`: whether the output should have syntax-highlighting or not. 
 - `-l number` or `--level number` : levels of implementation that should be pretty-printed. (default is all the way down to Prelude)
-- `-h` or `--help` : the help screen.
+- `-h` or `--help` : The help screen.
+- `-n` or `--line-number` : Print with line numbers
 
 
 ## Disclaimer

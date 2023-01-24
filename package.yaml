@@ -49,6 +49,7 @@ default-extensions:
   - TypeOperators
   - TypeApplications
   - DataKinds
+  - ViewPatterns
   - PolyKinds
   - DeriveGeneric
   - KindSignatures

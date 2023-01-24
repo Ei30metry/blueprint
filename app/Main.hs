@@ -38,4 +38,4 @@ main = runGhc (Just libdir) $ do
   pmod <- parseModule modSum
   (glRdrEnv, rnSource) <- rnWithGlobalEnv pmod
   -- let names =
-  -- liftIO $ putStrLn $ showPprUnsafe glRdrEnv
+  liftIO $ putStrLn $ showPprUnsafe glRdrEnv

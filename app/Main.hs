@@ -1,7 +1,10 @@
 module Main (main) where
 
+import           CLI                    ( parseSearchEnv )
+
 import           Compute                ( rnWithGlobalEnv )
 
+import           Control.Applicative    ( (<**>) )
 import           Control.Monad.IO.Class ( liftIO )
 
 import           GHC                    ( Backend (..), DynFlags (backend),
@@ -19,23 +22,31 @@ import           GHC                    ( Backend (..), DynFlags (backend),
 import           GHC.Paths              ( libdir )
 import           GHC.Utils.Outputable   ( showPprUnsafe )
 
+import           Options.Applicative    ( execParser, fullDesc, header, helper,
+                                          info, progDesc )
+
 import           System.Environment     ( getArgs )
 
 
 main :: IO ()
-main = runGhc (Just libdir) $ do
-  file <- liftIO $ head <$> getArgs
-  let fileModuleName = reverse $ takeWhile (/= '/') $ reverse $ take (length file - 3) file
-  env <- getSession
-  dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags { backend = NoBackend }
+main = do
+  searchEnv <- execParser (info (parseSearchEnv <**> helper)
+                          (fullDesc <> progDesc "Print recursive declerations of an entity"
+                           <> header "A different approach to showing outgoing call hierarchy for Haskell source code."))
+  print searchEnv
+-- main = runGhc (Just libdir) $ do
+--   file <- liftIO $ head <$> getArgs
+--   let fileModuleName = reverse $ takeWhile (/= '/') $ reverse $ take (length file - 3) file
+--   env <- getSession
+--   dflags <- getSessionDynFlags
+--   setSessionDynFlags $ dflags { backend = NoBackend }
 
-  target <- guessTarget file Nothing
-  setTargets [target]
-  load LoadAllTargets
-  modSum <- getModSummary $ mkModuleName fileModuleName
+--   target <- guessTarget file Nothing
+--   setTargets [target]
+--   load LoadAllTargets
+--   modSum <- getModSummary $ mkModuleName fileModuleName
 
-  pmod <- parseModule modSum
-  (glRdrEnv, rnSource) <- rnWithGlobalEnv pmod
-  -- let names =
-  liftIO $ putStrLn $ showPprUnsafe glRdrEnv
+--   pmod <- parseModule modSum
+--   (glRdrEnv, rnSource) <- rnWithGlobalEnv pmod
+--   -- let names =
+--   liftIO $ putStrLn $ showPprUnsafe glRdrEnv

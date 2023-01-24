@@ -101,7 +101,7 @@ takes the type we want to pretty-print as an argument.
 
 ### Options and flags for `type`
 
-- `-t` or `--type-synonyms` : convert Type-synonyms to their actual Types.
+- `-t` or `--type-synonyms` : Reduce Type-Synonyms to their original type.
 
 ## Universal Flags and Options
 

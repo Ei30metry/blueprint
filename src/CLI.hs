@@ -10,10 +10,10 @@ import           Options.Applicative.Builder
 
 import           Types                       ( Entity (..), Scope (..),
                                                SearchEnv (..), SearchLevel (..),
-                                               TyConf (..), readScope )
+                                               TypeC (..), readScope )
+
 
 type Params = SearchEnv
-
 
 parseFilePath :: Parser FilePath
 parseFilePath = argument str (metavar "FILENAME")
@@ -36,7 +36,7 @@ parseFuncCommand = FunctionE <$> ((TopLevel <$> parseFunction) <|> parseScopedFu
 parseTypeCommand :: Parser Entity
 parseTypeCommand =  DataTypeE <$> parseTyConf
   where parseTySynOption = switch (long "type-synonyms" <> short 't' <> help "Show the real types of type synonyms")
-        parseTyConf = TyConf <$> argument str (metavar "TYPE NAME")
+        parseTyConf = TypeC <$> argument str (metavar "TYPE NAME")
                                 <*> parseTySynOption
 
 -- parses the Level option (number of the levels to go through AST)
@@ -53,7 +53,7 @@ parseColorFlag = switch (long "color" <> short 'c'
 -- parses the line number flag
 parseLineNumber :: Parser Bool
 parseLineNumber = switch (long "line-number" <> short 'n'
-                       <> help "Whether or not to show the line numbers")
+                       <> help "show the line numbers")
 
 
 -- parses all the search environment from the command line

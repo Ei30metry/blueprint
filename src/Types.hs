@@ -1,15 +1,15 @@
 module Types(Entity(..), SearchEnv(..)
             , Scope(..), readScope, SearchLevel(..)
-            , TyConf(..)) where
+            , TypeC(..)) where
 
 import           Data.List.Extra ( splitOn )
 
 
 data Entity = FunctionE Scope
-            | DataTypeE TyConf deriving (Show, Eq)
+            | DataTypeE TypeC deriving (Show, Eq)
 
-data TyConf = TyConf { typeName       :: String
-                     , reduceSynonyms :: Bool} deriving (Show, Eq)
+data TypeC = TypeC { typeName       :: String
+                   , reduceSynonyms :: Bool} deriving (Show, Eq)
 
 type LocalFunc  = String
 type ParentFunc = String

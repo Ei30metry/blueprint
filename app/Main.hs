@@ -1,5 +1,7 @@
 module Main (main) where
 
+import           App                    ( runBluePrint )
+
 import           CLI                    ( parseSearchEnv )
 
 import           Compute                ( rnWithGlobalEnv )

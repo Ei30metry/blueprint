@@ -31,6 +31,5 @@ instance Loves Name where
   loves = morphism
 
 
-
 -- main :: IO ()
 -- main = mapM_ (print . loves) ([minBound .. maxBound] :: [Name])

@@ -1,8 +1,6 @@
 module Types(Entity(..), SearchEnv(..)
-            , Scope(..), readScope, SearchLevel(..)
-            , TypeC(..)) where
-
-import           Data.List.Extra ( splitOn )
+            , Scope(..), SearchLevel(..)
+            , TypeC(..), EntityOccDef, ParentFunc, Func, LocalFunc) where
 
 
 data Entity = FunctionE Scope
@@ -11,13 +9,14 @@ data Entity = FunctionE Scope
 data TypeC = TypeC { typeName       :: String
                    , reduceSynonyms :: Bool} deriving (Show, Eq)
 
-type LocalFunc  = String
-type ParentFunc = String
-type Func       = String
+type LocalFunc     = String
+type ParentFunc    = String
+type Func          = String
+type EntityOccDef = String
 
 
 data Scope = TopLevel Func
-           | Parent ParentFunc LocalFunc deriving (Eq, Show)
+           | ParentS ParentFunc LocalFunc deriving (Eq, Show)
 
 
 data SearchLevel = Level Int | ToBottom deriving (Show, Eq)
@@ -28,8 +27,3 @@ data SearchEnv = SEnv { entity     :: Entity      -- The thing we are searching 
                       , lineNumber :: Bool        -- Show line numbers when printing outputs
                       , modPath    :: FilePath }  -- Module path
                deriving (Show, Eq)
-
-
-readScope :: String -> Maybe Scope
-readScope (splitOn ":" -> [p, l]) = Just (Parent p l)
-readScope _                       = Nothing

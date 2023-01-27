@@ -1,16 +1,17 @@
-module CLI where
+module CLI (parseSearchEnv) where
 
-import           Control.Applicative         ( Alternative (..), many, some,
-                                               (<**>), (<|>) )
 
-import           Options.Applicative         ( Parser, argument, flag, help,
-                                               long, metavar, short, str,
-                                               strOption, switch )
-import           Options.Applicative.Builder
+import           Control.Applicative         ( (<|>) )
+
+import           Options.Applicative         ( Parser, argument, help, long,
+                                               metavar, short, str, switch )
+import           Options.Applicative.Builder ( command, info, maybeReader,
+                                               option, progDesc, subparser,
+                                               value )
 
 import           Types                       ( Entity (..), Scope (..),
                                                SearchEnv (..), SearchLevel (..),
-                                               TypeC (..), readScope )
+                                               TypeC (..) )
 
 
 type Params = SearchEnv
@@ -29,7 +30,7 @@ parseCommand = subparser $ funcCommand <> typeCommand
 parseFuncCommand :: Parser Entity
 parseFuncCommand = FunctionE <$> ((TopLevel <$> parseFunction) <|> parseScopedFunction)
   where parseFunction = argument str (metavar "FUNCTION NAME")
-        parseScopedFunction = Parent <$> parseFunction <*> option str (long "scope" <> short 's' <> help "Get the blueprint of a local function")
+        parseScopedFunction = ParentS <$> parseFunction <*> option str (long "scope" <> short 's' <> help "Get the blueprint of a local function")
 
 
 -- parses the function command, its options and flags

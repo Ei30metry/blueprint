@@ -2,23 +2,29 @@ module Main (main) where
 
 import           CLI                    ( parseSearchEnv )
 
-import           Compute                ( occNameFromEntity, rnWithGlobalEnv )
+import           Compute                ( occNameFromEntity, parseSourceFile,
+                                          parsedToGlobalRdrEnv',
+                                          rnWithGlobalEnv, searchOccName )
 
 import           Control.Applicative    ( (<**>) )
-import           Control.Monad.IO.Class ( liftIO )
+import           Control.Monad          ( (<=<), (>=>) )
+import           Control.Monad.IO.Class ( MonadIO, liftIO )
 
-import           GHC                    ( Backend (..), DynFlags (backend),
-                                          GhcMonad (getSession),
+import           Data.Functor           ( (<&>) )
+
+import           GHC                    ( Backend (..), DynFlags (backend), Ghc,
+                                          GhcMonad (getSession), GhcT,
                                           LoadHowMuch (LoadAllTargets),
                                           ParsedMod (parsedSource),
+                                          ParsedModule, RenamedSource,
                                           TypecheckedMod (moduleInfo),
                                           TypecheckedModule (tm_renamed_source, tm_typechecked_source),
                                           desugarModule, getModSummary,
                                           getSessionDynFlags, guessTarget, load,
                                           mkModuleName, modInfoExports,
                                           modInfoTyThings, parseModule, runGhc,
-                                          setSessionDynFlags, setTargets,
-                                          typecheckModule )
+                                          runGhcT, setSessionDynFlags,
+                                          setTargets, typecheckModule )
 import           GHC.Paths              ( libdir )
 import           GHC.Types.Name.Reader  ( GlobalRdrElt, GlobalRdrEnv,
                                           lookupGlobalRdrEnv )
@@ -31,19 +37,12 @@ import           Types                  ( SearchEnv (..) )
 
 
 
+-- TODO we should be able to compose and then runGhc at last
 main :: IO ()
-main = printGatheredSEnv
--- main = do
---   sEnv <- getSearchEnv
---   glblRdrEnv <- sourceToGlobalRdrEnv (modPath sEnv)
---   result <- searchOccName sEnv glblRdrEnv
---   print $ showPprUnsafe result
-
-
--- TODO not all module names are the same as their file name, give users option to set the style
-mkFileModName :: FilePath -> String
-mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)
-
+main = do
+  sEnv <- getSearchEnv
+  glblRdrEnv <- runGhc (Just libdir) $ parseSourceFile (modPath sEnv) >>= parsedToGlobalRdrEnv'
+  print . showPprUnsafe =<< searchOccName @IO sEnv glblRdrEnv
 
 printGatheredSEnv :: IO ()
 printGatheredSEnv = commandLineInterface >>= print
@@ -57,24 +56,3 @@ commandLineInterface = do
 
 getSearchEnv :: IO SearchEnv
 getSearchEnv = commandLineInterface
-
-
-searchOccName :: SearchEnv -> GlobalRdrEnv -> IO [GlobalRdrElt]
-searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)
-
-
-sourceToGlobalRdrEnv :: FilePath -> IO GlobalRdrEnv
-sourceToGlobalRdrEnv filePath = runGhc (Just libdir) $ do
-  let fileModuleName = mkFileModName filePath
-  env <- getSession
-  dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags { backend = NoBackend }
-
-  target <- guessTarget filePath Nothing
-  setTargets [target]
-  load LoadAllTargets
-  modSum <- getModSummary $ mkModuleName fileModuleName
-
-  pmod <- parseModule modSum
-  (glRdrEnv, _) <- rnWithGlobalEnv pmod
-  return glRdrEnv

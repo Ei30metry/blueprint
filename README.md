@@ -79,6 +79,12 @@ BOOM!
 .....
 ```
 
+you can even give a root directory if you don't know the location of your entity.
+`blueprint function f Main.hs` : definitin of function `f` in `Main.hs`.
+`blueprint function -s f g Main.hs` : definition of local function `g`, in top-level function `f` located in `Main.hs`.
+`blueprint type Name Main.hs` : definition of data type `Name` located in `Main.hs`.
+`blueprint type -t Name Main.hs` : definition of data type `Name` with type synonyms converted to their original type located in `Main.hs`. 
+
 ## Installing pre-compiled binaries 
 
 ## Building from source

@@ -30,7 +30,7 @@ parseCommand = subparser $ funcCommand <> typeCommand
 parseFuncCommand :: Parser Entity
 parseFuncCommand = FunctionE <$> ((TopLevel <$> parseFunction) <|> parseScopedFunction)
   where parseFunction = argument str (metavar "FUNCTION NAME")
-        parseScopedFunction = ParentS <$> parseFunction <*> option str (long "scope" <> short 's' <> help "Get the blueprint of a local function")
+        parseScopedFunction = ParentS <$> option str (long "scope" <> short 's' <> help "Get the blueprint of a local function") <*> parseFunction
 
 
 -- parses the function command, its options and flags

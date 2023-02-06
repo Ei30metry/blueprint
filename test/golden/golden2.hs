@@ -1,8 +1,10 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs     #-}
+{-# LANGUAGE PolyKinds #-}
 module Golden2 where
 
 
 import           Data.List                     ( sortOn )
-import           Data.Singletons.Base.TH       ( singletons )
 
 import           Text.Parsec                   ( alphaNum )
 import           Text.Parsec.Char              ( newline )

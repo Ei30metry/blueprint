@@ -2,8 +2,10 @@ module Main (main) where
 
 import           CLI                    ( parseSearchEnv )
 
-import           Compute                ( occNameFromEntity, parseSourceFile,
+import           Compute                ( mkFileModName, occNameFromEntity,
+                                          parseSourceFile,
                                           parsedToGlobalRdrEnv',
+                                          renamedSourceToBindings,
                                           rnWithGlobalEnv, searchOccName )
 
 import           Control.Applicative    ( (<**>) )
@@ -19,7 +21,7 @@ import           GHC                    ( Backend (..), DynFlags (backend), Ghc,
                                           ParsedModule, RenamedSource,
                                           TypecheckedMod (moduleInfo),
                                           TypecheckedModule (tm_renamed_source, tm_typechecked_source),
-                                          desugarModule, getModSummary,
+                                          depanal, desugarModule, getModSummary,
                                           getSessionDynFlags, guessTarget, load,
                                           mkModuleName, modInfoExports,
                                           modInfoTyThings, parseModule, runGhc,
@@ -33,16 +35,25 @@ import           GHC.Utils.Outputable   ( showPprUnsafe )
 import           Options.Applicative    ( execParser, fullDesc, header, helper,
                                           info, progDesc )
 
+import           System.Environment     ( getArgs )
+
 import           Types                  ( SearchEnv (..) )
 
 
 
 -- TODO we should be able to compose and then runGhc at last
+-- BUG changed the arity of parseSourceFile function, fix the code below
 main :: IO ()
-main = do
+main = printGatheredSEnv
+
+main' :: IO ()
+main' = do
   sEnv <- getSearchEnv
-  glblRdrEnv <- runGhc (Just libdir) $ parseSourceFile (modPath sEnv) >>= parsedToGlobalRdrEnv'
+  -- glblRdrEnv <- runGhc (Just libdir) $ parseSourceFile LoadAllTargets (modPath sEnv) >>= parsedToGlobalRdrEnv'
+  (glblRdrEnv, Just renamedSrc) <- runGhc (Just libdir) $ parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
   print . showPprUnsafe =<< searchOccName @IO sEnv glblRdrEnv
+  putStrLn "built ..."
+  print . showPprUnsafe =<< renamedSourceToBindings renamedSrc
 
 printGatheredSEnv :: IO ()
 printGatheredSEnv = commandLineInterface >>= print
@@ -56,3 +67,16 @@ commandLineInterface = do
 
 getSearchEnv :: IO SearchEnv
 getSearchEnv = commandLineInterface
+
+
+-- printModuleDependency :: FilePath -> IO ()
+-- printModuleDependency filePath = runGhc (Just libdir) $ do
+--   let fileModuleName = mkFileModName filePath
+--   env <- getSession
+--   dflags <- getSessionDynFlags
+--   setSessionDynFlags $ dflags { backend = NoBackend }
+--   target <- guessTarget filePath Nothing
+--   setTargets [target]
+--   load LoadAllTargets
+--   modGraph <- depanal [] True
+--   liftIO $ print $ showPprUnsafe modGraph

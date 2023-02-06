@@ -3,7 +3,7 @@ A different approach to showing "outgoing call hierarchy" for Haskell source cod
 
 
 ## Introduction
-Blueprint is a UNIX like command line utility which pretty-prints the definitions in outgoing call hierarchies by using the GHC Renamer to extract the definitions out of the AST.
+Blueprint is a UNIX like command line utility which pretty-prints the definitions in outgoing call hierarchies by using the GHC Renamer to extract the definitions out of the AST. 
 
 There are 2 commands in Blueprint:
 
@@ -13,6 +13,10 @@ There are 2 commands in Blueprint:
 
 
 ## Usage 
+`blueprint function f Main.hs` : definitin of function `f` in `Main.hs`.
+`blueprint function f -l g Main.hs` : definition of local function `g`, in top-level function `f` located in `Main.hs`.
+`blueprint type Name Main.hs` : definition of data type `Name` located in `Main.hs`.
+`blueprint type Name -t Main.hs` : definition of data type `Name` with type synonyms converted to their original type located in `Main.hs`. 
 
 
 ## Example
@@ -75,22 +79,25 @@ parseMoodReports = do
 Running `blueprint function parseMoodReports -c "HERE"` would result in:
 
 ``` text
-BOOM!
+parseMoodReports := mood, many, newline, many1, parseMoodReport, (<*), (>>), (>>=), return, sortOn, fst
+... 
+... 
+... 
 .....
 ```
 
 you can even give a root directory if you don't know the location of your entity.
 `blueprint function f Main.hs` : definitin of function `f` in `Main.hs`.
-`blueprint function -s f g Main.hs` : definition of local function `g`, in top-level function `f` located in `Main.hs`.
+`blueprint function f -l g Main.hs` : definition of local function `g`, in top-level function `f` located in `Main.hs`.
 `blueprint type Name Main.hs` : definition of data type `Name` located in `Main.hs`.
-`blueprint type -t Name Main.hs` : definition of data type `Name` with type synonyms converted to their original type located in `Main.hs`. 
+`blueprint type Name -t Main.hs` : definition of data type `Name` with type synonyms converted to their original type located in `Main.hs`. 
 
 ## Installing pre-compiled binaries 
 
 ## Building from source
 
 ### Dependencies
-GHC (of course) 
+GHC 
 stack 
 
 
@@ -100,7 +107,8 @@ Takes the function we want to pretty-print as an argument.
 
 ### options and flags for `function`
 
-- `-s func` `--scope func` : getting the bluprint of a locally-scoped function
+- `-l func` or `--local-scope func` : Get the bluprint of a locally-scoped function.
+- `-T` or `--type-signature` : Get the blueprint with type signatures. (if the function doesn't have a type signature, the inferred type will be printed.)
 
 ## The `type` command 
 takes the type we want to pretty-print as an argument.
@@ -112,9 +120,12 @@ takes the type we want to pretty-print as an argument.
 ## Universal Flags and Options
 
 - `-c` or `--color`: whether the output should have syntax-highlighting or not. 
-- `-l number` or `--level number` : levels of implementation that should be pretty-printed. (default is all the way down to Prelude)
+- `-L number` or `--level number` : Levels of implementation that should be pretty-printed. (default is all the way down to Prelude)
 - `-h` or `--help` : The help screen.
-- `-n` or `--line-number` : Print with line numbers
+- `-n` or `--line-number` : Print with line numbers.
+- `-i FILE` or `--image FILE` : Save the result in an image file.
+- `-p FILE` or `--pdf FILE` : Save the result in a pdf file.
+- `-s FILE` or `--source-code FILE` : save the result in a haskell file.
 
 
 ## Disclaimer

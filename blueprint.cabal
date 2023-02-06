@@ -30,6 +30,7 @@ library
       App
       CLI
       Compute
+      ModDependency
       Output
       Types
   other-modules:

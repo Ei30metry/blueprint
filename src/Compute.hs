@@ -11,6 +11,9 @@ import           Control.Monad.Trans           ( MonadTrans, lift, liftIO )
 import           Control.Monad.Trans.Maybe     ( MaybeT (..) )
 import           Control.Monad.Trans.Reader    ( ReaderT (..), ask, asks, local,
                                                  mapReaderT, withReaderT )
+import           Control.Monad.Trans.Writer    ( execWriterT, listens,
+                                                 mapWriterT, pass, runWriterT,
+                                                 tell )
 
 import           Data.Foldable                 ()
 import           Data.Functor                  ( (<&>) )
@@ -122,17 +125,10 @@ entityToName = undefined
 -- and if it didn't, then there is no GlobalRdrElt with the specifications you are looking for
 
 -- lookup an Entity from the
-lookupEntity :: BluePrint GlobalRdrEnv [GlobalRdrElt]
-lookupEntity  = undefined
-
-
-toHsGroup :: ParsedModule -> IOEnv (Env TcGblEnv TcLclEnv) (TcGblEnv, HsGroup GhcRn)
-toHsGroup = rnSrcDecls <=< fstM <=< findSplice . hsmodDecls . unLoc . pm_parsed_source
-  where fstM = return . fst
-
 
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]
 searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)
+-- searchOccName = undefined
 
 
 parseSourceFile :: GhcMonad m => LoadHowMuch -> FilePath -> m ParsedModule
@@ -147,6 +143,10 @@ parseSourceFile loadHowMuch filePath = do
   modSum <- getModSummary $ mkModuleName fileModuleName
   parseModule modSum
 
+
+-- Create a viable AST data type
+nonMonadicImplmentationFinder :: (GlobalRdrEnv, RenamedSource) -> a
+nonMonadicImplmentationFinder = undefined
 
 
 -- Only need the HomeUnitModule

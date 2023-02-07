@@ -28,10 +28,14 @@ source-repository head
 library
   exposed-modules:
       App
+      Blueprint
       CLI
       Compute
       ModDependency
       Output
+      Output.Image
+      Output.Pdf
+      Output.Source
       Types
   other-modules:
       Paths_blueprint

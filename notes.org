@@ -1,0 +1,157 @@
+#+title: Notes
+#+author: Artin Ghasivand
+
+* TODO To Learn about [0/4]
+** TODO Types [0/0]
+*** OccName
+occNameSpace :: [[NameSpace]]
+occNameFs    :: FastString
+*** NameSpace
+VarName
+Dataname
+TvName
+TcClsname
+*** NameSort
+External Module (Maybe Name)
+WiredIn Module (Maybe Name) TyThing BuiltInSyntax
+Internal
+System
+
+*** Name
+n_sort   :: [[NameSort]]
+n_occ    :: [[OccName]]
+n_unique :: Int#
+n_loc    :: [[SrcLoc]]
+*** Unique
+*** UniqFM
+*** OccEnv
+[[UniqFM]] of [[OccName]]
+*** Parent
+Parent of a data contructor is its data type
+Parent of a record selector is its data type
+Parent of a class operation is its class
+
+important stuff:
+    - [[Name]]
+#+begin_src haskell
+data Parent = NoParent
+            | ParentIs {par_is :: Name}
+#+end_src
+*** NameCache
+*** GlobalRdrElt
+Global reader element. An element of the GlobalRdrEnv
+important stuff:
+    - [[Parent]]
+    - [[GreName]]
+
+#+begin_src haskell
+GRE { gre_name :: [[GreName]]
+    , gre_par  :: Parent
+    , gre_lcl  :: Bool
+    , gre_imp  :: Bag ImportSpec }
+#+end_src
+*** GlobalRdrEnv
+Important stuff:
+- [[GlobalRdrElt]]
+- [[OccEnv]]
+#+begin_src haskell
+type GobalRdrEnv = OccEnv [GlobalRdrElt]
+#+end_src
+*** GreName
+Important stuff:
+    - [[Name]]
+    - [[Fieldlabel]]
+#+begin_src haskell
+data GreName = NormalGreName Name
+             | FieldGrename FieldLabel
+#+end_src
+*** LocalRdrEnv
+used to keep track of local scopes: where, let, lambda, case
+
+important stuff:
+    - [[NameSet]]
+    - [[OccEnv]]
+    - [[Name]]
+#+begin_src haskell
+data LocalRdrEnv = LRE { lre_env :: OccEnv Name
+                       , lre_in_scope :: NameSet }
+#+end_src
+*** SrcLoc
+location in the source
+*** ModuleName
+*** FieldLabel
+fields in algebraic record types.
+important stuff:
+    - [[Name]]
+    - [[FieldSelectors]]
+#+begin_src haskell
+
+#+end_src
+*** DynFlags
+*** NameMaker
+*** ModSummary
+*** HsModule
+*** LHsDecl
+*** Located
+*** Uses
+*** Defs
+*** DefUses
+*** UniqSet
+*** Usage
+*** HsLocalBindsLR - HsLocalBinds - LHsLocalBinds
+*** HsValBinds
+*** HsBindLR
+haskell binding with seperate left and right id's
+#+begin_src haskell
+data HsBindLR idL idR = FunBind ...
+                      | PatBind ...
+                      | VarBind ...
+#+end_src
+
+
+** TODO Functions [15/16]
++ [ ] x_set
++ [X] hscTypeCheckRename
++ [X] typecheckModule
++ [X] parseModule
++ [X] hsc_typcheckandRename
++ [X] rnSrcDecls
++ [X] applyNameMaker
++ [X] mkUnboundName
++ [X] mkUnboundNameRdr
++ [X] showAstData
++ [X] nameIsLocalOrFrom
++ [X] nameModule_maybe
++ [X] getSrcLoc
++ [X] pprDefindAt
++ [X] nameSrcLoc
++ [X] getOccString
+
+** TODO Type classes [0/2]
++ [ ] HasOccName
+
+** TODO Ideas [0/0]
++ [ ] target
++ [ ] modules
++ [ ] identifiers
+
+*** Algorithm
+1. use Entity to find the GlobalRdrElt
+2. traverse HsGroup to find the correspnding function or value binding in it
+3. build a Rose-tree
+4. go one level deeper in HsGroup
+5. lookup all the gathered Names of our bindings in our located HsValBinds
+6. recurse
+
+* TODO Jan 11
+** Steps
+1. figure out how _Name_ are gathered.
+2. find th first function that converts RdrName to _Name_.
+3. figure out how you are suppose to _Name_ data from _HsGroup_.
+4. get some data strucutre of all the gathered _Names_ after the renamer is ran.
+* TODO Implementation details [0/0]
+- converting 'Entity' to 'GlobalRdrElt' is redundant and instead, I should try to find the closest 'GlobalRdrElt' corresponding to the 'Entity'
+
+** checking to see if the module is in the packages or defined by the user
+- Doing while loading the module
+- Filtering after the GlobalRdrEnv is constructed.

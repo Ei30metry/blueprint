@@ -25,7 +25,10 @@ data Scope = TopLevel Func
 
 data SearchLevel = Level Int | ToBottom deriving (Show, Eq)
 
-data Print = STDIO | File FilePath deriving (Show, Eq)
+
+data Print = STDIO
+           | File FilePath
+           deriving (Show, Eq)
 
 data OutputType = Image FilePath
                 | PDF FilePath

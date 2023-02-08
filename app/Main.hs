@@ -4,7 +4,6 @@ import           CLI                    ( parseSearchEnv )
 
 import           Compute                ( mkFileModName, occNameFromEntity,
                                           parseSourceFile,
-                                          parsedToGlobalRdrEnv',
                                           renamedSourceToBindings,
                                           rnWithGlobalEnv, searchOccName )
 
@@ -28,8 +27,6 @@ import           GHC                    ( Backend (..), DynFlags (backend), Ghc,
                                           runGhcT, setSessionDynFlags,
                                           setTargets, typecheckModule )
 import           GHC.Paths              ( libdir )
-import           GHC.Types.Name.Reader  ( GlobalRdrElt, GlobalRdrEnv,
-                                          lookupGlobalRdrEnv )
 import           GHC.Utils.Outputable   ( showPprUnsafe )
 
 import           Options.Applicative    ( execParser, fullDesc, header, helper,
@@ -46,10 +43,9 @@ import           Types                  ( SearchEnv (..) )
 main :: IO ()
 main = printGatheredSEnv
 
-main' :: IO ()
-main' = do
+prototype :: IO ()
+prototype = do
   sEnv <- getSearchEnv
-  -- glblRdrEnv <- runGhc (Just libdir) $ parseSourceFile LoadAllTargets (modPath sEnv) >>= parsedToGlobalRdrEnv'
   (glblRdrEnv, Just renamedSrc) <- runGhc (Just libdir) $ parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
   print . showPprUnsafe =<< searchOccName @IO sEnv glblRdrEnv
   putStrLn "built ..."

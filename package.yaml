@@ -55,6 +55,7 @@ default-extensions:
   - KindSignatures
   - StandaloneKindSignatures
   - RoleAnnotations
+  - TemplateHaskell
 
 ghc-options:
 - -Wall

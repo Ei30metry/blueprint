@@ -100,6 +100,9 @@ important stuff:
 *** Usage
 *** HsLocalBindsLR - HsLocalBinds - LHsLocalBinds
 *** HsValBinds
+#+begin_src
+
+#+end_src
 *** HsBindLR
 haskell binding with seperate left and right id's
 #+begin_src haskell
@@ -108,6 +111,16 @@ data HsBindLR idL idR = FunBind ...
                       | VarBind ...
 #+end_src
 
+*** Bag
+Bag: an unordered collection with duplicates
+#+begin_src haskell
+data Bag a
+  = EmptyBag
+  | UnitBag a
+  | TwoBags (Bag a) (Bag a) -- INVARIANT: neither branch is empty
+  | ListBag [a]             -- INVARIANT: the list is non-empty
+  deriving (Functor)
+#+end_src
 
 ** TODO Functions [15/16]
 + [ ] x_set

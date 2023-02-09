@@ -1,4 +1,4 @@
-module Output.Source where
+module Result.Source where
 
 
 createSource = undefined

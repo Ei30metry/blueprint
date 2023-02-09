@@ -2,14 +2,15 @@ module Main (main) where
 
 import           CLI                    ( parseSearchEnv )
 
-import           Compute                ( mkFileModName, occNameFromEntity,
-                                          parseSourceFile,
+import           Compute                ( occNameFromEntity, parseSourceFile,
+                                          prototypeFunc,
                                           renamedSourceToBindings,
                                           rnWithGlobalEnv, searchOccName )
 
 import           Control.Applicative    ( (<**>) )
 import           Control.Monad          ( (<=<), (>=>) )
 import           Control.Monad.IO.Class ( MonadIO, liftIO )
+import           Control.Monad.Trans    ( lift )
 
 import           Data.Functor           ( (<&>) )
 
@@ -41,15 +42,23 @@ import           Types                  ( SearchEnv (..) )
 -- TODO we should be able to compose and then runGhc at last
 -- BUG changed the arity of parseSourceFile function, fix the code below
 main :: IO ()
-main = printGatheredSEnv
+main = printBindings "/Users/artin/Programming/projects/blueprint/test/golden/Golden5.hs"
 
 prototype :: IO ()
-prototype = do
-  sEnv <- getSearchEnv
-  (glblRdrEnv, Just renamedSrc) <- runGhc (Just libdir) $ parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
-  print . showPprUnsafe =<< searchOccName @IO sEnv glblRdrEnv
-  putStrLn "built ..."
-  print . showPprUnsafe =<< renamedSourceToBindings renamedSrc
+prototype = runGhcT (Just libdir) $ do
+  sEnv <- liftIO getSearchEnv
+  -- (glblRdrEnv, _) <- parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
+  myTuple <- parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
+  renSrc <- return . (\(Just x) -> x) $ snd myTuple
+  liftIO $ print . showPprUnsafe =<< searchOccName @IO sEnv (fst myTuple)
+  bindings <- renamedSourceToBindings renSrc
+  liftIO . print $ showPprUnsafe bindings
+
+
+printBindings :: FilePath -> IO ()
+printBindings filePath = runGhcT (Just libdir) $ do
+  result <- prototypeFunc filePath
+  liftIO . print $ showPprUnsafe result
 
 printGatheredSEnv :: IO ()
 printGatheredSEnv = commandLineInterface >>= print
@@ -63,16 +72,3 @@ commandLineInterface = do
 
 getSearchEnv :: IO SearchEnv
 getSearchEnv = commandLineInterface
-
-
--- printModuleDependency :: FilePath -> IO ()
--- printModuleDependency filePath = runGhc (Just libdir) $ do
---   let fileModuleName = mkFileModName filePath
---   env <- getSession
---   dflags <- getSessionDynFlags
---   setSessionDynFlags $ dflags { backend = NoBackend }
---   target <- guessTarget filePath Nothing
---   setTargets [target]
---   load LoadAllTargets
---   modGraph <- depanal [] True
---   liftIO $ print $ showPprUnsafe modGraph

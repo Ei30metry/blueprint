@@ -1,4 +1,4 @@
-module Output.Image where
+module Result.Image where
 
 import           Data.ByteString
 

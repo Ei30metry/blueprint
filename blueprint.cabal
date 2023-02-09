@@ -34,11 +34,14 @@ library
       Compute.AST
       Compute.Morphisms
       Compute.Search
-      Output
-      Output.Image
-      Output.Pdf
-      Output.Source
+      Error
+      Result
+      Result.Image
+      Result.Pdf
+      Result.Source
       Types
+      Types.AST
+      Types.Search
   other-modules:
       Paths_blueprint
   hs-source-dirs:

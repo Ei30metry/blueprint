@@ -1,4 +1,4 @@
-module Output.Pdf where
+module Result.Pdf where
 
 import           Data.ByteString
 

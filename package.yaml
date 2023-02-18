@@ -38,8 +38,10 @@ dependencies:
 - prettyprinter-ansi-terminal
 - monad-par
 - parallel
+- exceptions
 
 default-extensions:
+  - AllowAmbiguousTypes
   - MultiParamTypeClasses
   - GADTs
   - ScopedTypeVariables
@@ -56,6 +58,10 @@ default-extensions:
   - StandaloneKindSignatures
   - RoleAnnotations
   - TemplateHaskell
+  - EmptyCase
+  - DeriveAnyClass
+  - GeneralizedNewtypeDeriving
+  - DeriveFunctor
 
 ghc-options:
 - -Wall

@@ -1,9 +1,11 @@
+{-# LANGUAGE DeriveGeneric   #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Golden4 where
 
-import           Control.Lens           ( makeLenses )
-import           Control.Lens.Operators
+import           Control.Lens ( makeLenses )
 
-import           GHC.Generics
+import           GHC.Generics ( Generic )
 
 
 data InfoConf = Info { _name  :: String

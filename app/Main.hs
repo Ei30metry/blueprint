@@ -1,16 +1,18 @@
 module Main (main) where
 
 import           CLI                    ( parseSearchEnv )
+import App (BluePrint(..), runBluePrint)
 
 import           Compute                ( occNameFromEntity, parseSourceFile,
-                                          prototypeFunc,
-                                          renamedSourceToBindings,
+                                          prototypeFunc, rnSrcToBinds,
                                           rnWithGlobalEnv, searchOccName )
+import           Compute.AST            ( prototypeFunc, rnSrcToBinds, initializeEnv )
 
 import           Control.Applicative    ( (<**>) )
 import           Control.Monad          ( (<=<), (>=>) )
 import           Control.Monad.IO.Class ( MonadIO, liftIO )
 import           Control.Monad.Trans    ( lift )
+import Control.Monad.Trans.Reader
 
 import           Data.Functor           ( (<&>) )
 
@@ -28,30 +30,49 @@ import           GHC                    ( Backend (..), DynFlags (backend), Ghc,
                                           runGhcT, setSessionDynFlags,
                                           setTargets, typecheckModule )
 import           GHC.Paths              ( libdir )
-import           GHC.Utils.Outputable   ( showPprUnsafe )
+import           GHC.Utils.Outputable   ( showPprUnsafe, Outputable(..) )
 
+import Control.Monad.Catch (MonadMask (..))
 import           Options.Applicative    ( execParser, fullDesc, header, helper,
                                           info, progDesc )
 
 import           System.Environment     ( getArgs )
 
 import           Types                  ( SearchEnv (..) )
+import Data.Kind (Type, Constraint)
 
 
 
 -- TODO we should be able to compose and then runGhc at last
 -- BUG changed the arity of parseSourceFile function, fix the code below
 main :: IO ()
-main = printBindings "/Users/artin/Programming/projects/blueprint/test/golden/Golden5.hs"
+main = putStrLn "building ..."
+-- main = do
+--   prototypeBlueprintComp
+
+  -- runGhcT (Just libdir) $ do
+  -- result <- runReaderT (customRunner prototypeFunc) "/Users/artin/Programming/projects/blueprint/test/golden/Golden5.hs"
+  -- liftIO . print $ showPprUnsafe result
+
+
+
+-- customRunner computation = do
+--   fp <- ask
+--   ghcEnv <- lift $ initializeEnv fp
+--   result <- lift $ computation fp
+--   return result
+
 
 prototype :: IO ()
 prototype = runGhcT (Just libdir) $ do
   sEnv <- liftIO getSearchEnv
+  dynFlags <- getSessionDynFlags
+  setSessionDynFlags dynFlags
   -- (glblRdrEnv, _) <- parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
   myTuple <- parseSourceFile LoadAllTargets (modPath sEnv) >>= rnWithGlobalEnv
   renSrc <- return . (\(Just x) -> x) $ snd myTuple
   liftIO $ print . showPprUnsafe =<< searchOccName @IO sEnv (fst myTuple)
-  bindings <- renamedSourceToBindings renSrc
+  bindings <- rnSrcToBinds renSrc
   liftIO . print $ showPprUnsafe bindings
 
 

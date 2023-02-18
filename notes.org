@@ -2,6 +2,7 @@
 #+author: Artin Ghasivand
 
 * TODO To Learn about [0/4]
+
 ** TODO Types [0/0]
 *** OccName
 occNameSpace :: [[NameSpace]]
@@ -151,18 +152,30 @@ data Bag a
 4. go one level deeper in HsGroup
 5. lookup all the gathered Names of our bindings in our located HsValBinds
 6. recurse
+* TODO GHC conventions
+** Strict Annotation
+The reason we might sometimes have proper data constructors with their parameter being strict is that they might, in some passes, \beta-reduce to DataConCantHappen and being strict helps the pattern matching analyzer to realize we don't need to pattern match over those constructors
 
+example:
+
+
+** Extensions
 * TODO Jan 11
 ** Steps
-1. figure out how _Name_ are gathered.
-2. find th first function that converts RdrName to _Name_.
-3. figure out how you are suppose to _Name_ data from _HsGroup_.
-4. get some data strucutre of all the gathered _Names_ after the renamer is ran.
+1. figure out how [[Name]] are gathered.
+2. find th first function that converts [[RdrName]] to [[Name]].
+3. figure out how you are suppose to [[Name]] data from [[HsGroup]]
+4. get some data strucutre of all the gathered [[Name]] after the renamer is ran.
+
 * TODO Implementation details [0/0]
 - converting 'Entity' to 'GlobalRdrElt' is redundant and instead, I should try to find the closest 'GlobalRdrElt' corresponding to the 'Entity'
 
 ** checking to see if the module is in the packages or defined by the user
 - Doing while loading the module
 - Filtering after the GlobalRdrEnv is constructed.
+** Moand stack idea
+- Trying to write the computations outside the GhcMonad GhcT (ReaderT a m) b
+- Coupling GhcMonad and other monad transformers through impure actions (ReaderT a (GhcT m) b)
+
 
 * IDEA Running a computation inside GHC using CPS

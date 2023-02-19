@@ -1,8 +1,8 @@
 module Compute.AST where
 
-import           App                               ( BluePrint (..),
-                                                     mkFileModName )
+import           App                               ( BluePrint (..) )
 
+import           Control.Lens.Combinators          ( Field1 (_1), view )
 import           Control.Monad                     ( liftM, void, (<=<) )
 import           Control.Monad.IO.Class            ( liftIO )
 import           Control.Monad.Trans               ( MonadTrans (..) )
@@ -12,8 +12,6 @@ import           Control.Monad.Trans.Reader        ( ReaderT, ask, asks, local,
 import           Control.Monad.Trans.Writer.Lazy   ( WriterT (..), execWriterT,
                                                      mapWriterT )
 
-import           Data.Coerce                       ( coerce )
-
 import           GHC                               ( AnnSortKey, Backend (..),
                                                      DynFlags (backend),
                                                      GhcMonad (getSession),
@@ -22,6 +20,7 @@ import           GHC                               ( AnnSortKey, Backend (..),
                                                      HsValBindsLR (ValBinds, XValBindsLR),
                                                      HscEnv (..),
                                                      LoadHowMuch (..),
+                                                     ModSummary,
                                                      NHsValBindsLR (NValBinds),
                                                      NamedThing (..),
                                                      ParsedModule (ParsedModule),
@@ -45,7 +44,6 @@ import           GHC.Hs.Utils                      ( CollectFlag (..),
                                                      collectHsValBinders,
                                                      spanHsLocaLBinds )
 import           GHC.Parser.Annotation             ()
-import           GHC.Plugins                       ( panic )
 import           GHC.Tc.Types                      ( TcGblEnv (tcg_rdr_env) )
 import           GHC.Types.Basic                   ( RecFlag )
 import           GHC.Types.Name                    ( Name (..) )
@@ -62,52 +60,26 @@ import           Types                             ( Entity (..),
                                                      SearchLevel (..) )
 
 
-data GhcEnv = GhcEnv { ourHscEnv     :: HscEnv
-                     , ourDynFlags   :: DynFlags
-                     , currentTarget :: Target
-                     , sucessFlag    :: SuccessFlag }
-
-
-rnWithGlobalEnv :: GhcMonad m => ParsedModule -> m (GlobalRdrEnv, Maybe RenamedSource)
-rnWithGlobalEnv = return . glbWithRenamed <=< typecheckModule
+rnWithGlobalEnv' :: GhcMonad m => ParsedModule -> m (GlobalRdrEnv, Maybe RenamedSource)
+rnWithGlobalEnv' = return . glbWithRenamed <=< typecheckModule
   where glbWithRenamed tChecked = (tcg_rdr_env . fst . tm_internals_ $ tChecked, tm_renamed_source tChecked)
 
--- TODO implement both with ReaderT and without ReaderT
-initializeEnv :: GhcMonad m => FilePath -> m GhcEnv
-initializeEnv fp = do
-  let fileModuleName = mkFileModName fp
-  env <- getSession
-  dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags {backend = NoBackend}
-  target <- guessTarget fp Nothing
-  setTargets [target]
-  succFlag <- load LoadAllTargets
-  return $ GhcEnv env dflags target succFlag
 
-parseSourceFile :: GhcMonad m => LoadHowMuch -> FilePath -> m ParsedModule
-parseSourceFile loadHowMuch filePath = do
-  let fileModuleName = mkFileModName filePath
-  env <- getSession
-  dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags { backend = NoBackend }
-  target <- guessTarget filePath Nothing
-  setTargets [target]
-  load loadHowMuch -- TODO construct a Unit in order to feed your path to your module
-  modSum <- getModSummary $ mkModuleName fileModuleName
-  parseModule modSum
+rnWithGlobalEnv :: forall w m. (GhcMonad m, Monoid w) => BluePrint ParsedModule w m (GlobalRdrEnv, Maybe RenamedSource)
+rnWithGlobalEnv = BT $ do
+    parsedAST <- ask
+    lift . lift $ go parsedAST
+  where
+    go = return . glbWithRenamed <=< typecheckModule
+    glbWithRenamed tcd = (tcg_rdr_env . fst . tm_internals_ $ tcd, tm_renamed_source tcd)
 
 
-parseSourceFile' :: GhcMonad m => FilePath -> m ParsedModule
-parseSourceFile' filePath = getModSummary (mkModuleName $ mkFileModName filePath) >>= parseModule
+parseSourceFile :: forall w m. (Monoid w, GhcMonad m) => BluePrint ModSummary w m ParsedModule
+parseSourceFile = BT $ ask >>= \modSum -> lift . lift $ parseModule modSum
 
 
-rnSrcToBinds :: GhcMonad m => RenamedSource -> m (HsValBinds GhcRn)
-rnSrcToBinds = return . hs_valds . \(b,_,_,_) -> b
-
-
--- defaultParseMode :: GhcMonad m => FilePath -> m ParsedModule
--- defaultParseMode = parseSourceFile LoadAllTargets
-
+rnSrcToBinds :: forall m w. (GhcMonad m, Monoid w) => BluePrint RenamedSource w m (HsValBinds GhcRn)
+rnSrcToBinds = BT $ ask >>= lift . lift . return . hs_valds . view _1
 
 -- not exported by ghc-lib, so we define it locally
 data DataConCantHappen
@@ -118,14 +90,3 @@ dataConCantHappen x = case x of {}
 -- IdP GhcRn ~ Name
 valBindsToHsBinds :: HsValBinds GhcRn -> [IdP GhcRn]
 valBindsToHsBinds = collectHsValBinders CollNoDictBinders
-
--- prototypeFunc :: GhcMonad m => FilePath -> m [(RecFlag, LHsBinds GhcRn)]
--- BUG find out the source of renamed source being in a maybe context and then try to avoid panic
-prototypeFunc :: GhcMonad m => FilePath -> m [IdP GhcRn]
-prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds <=< handleRenamed . snd <=< rnWithGlobalEnv <=< parseSourceFile LoadAllTargets
-  where handleRenamed (Just x) = return x
-        handleRenamed Nothing  = panic "Couldln't run our parsed module through Renamer"
-
-
-prototypeFuncB' :: GhcMonad m => ReaderT FilePath (WriterT String m) [Name]
-prototypeFuncB' = ask >>= \filePath -> lift . lift $ prototypeFunc filePath

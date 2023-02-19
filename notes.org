@@ -1,7 +1,7 @@
 #+title: Notes
 #+author: Artin Ghasivand
 
-* TODO To Learn about [0/4]
+* TODO To Learn about [0/3]
 
 ** TODO Types [0/0]
 *** OccName
@@ -174,8 +174,6 @@ example:
 - Doing while loading the module
 - Filtering after the GlobalRdrEnv is constructed.
 ** Moand stack idea
-- Trying to write the computations outside the GhcMonad GhcT (ReaderT a m) b
-- Coupling GhcMonad and other monad transformers through impure actions (ReaderT a (GhcT m) b)
-
+- Implicitly passing GhcEnv using by giving it a Monoid instance and using it as the logging data in the Writer monad
 
 * IDEA Running a computation inside GHC using CPS

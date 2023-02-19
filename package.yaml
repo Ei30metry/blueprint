@@ -59,7 +59,6 @@ default-extensions:
   - RoleAnnotations
   - TemplateHaskell
   - EmptyCase
-  - DeriveAnyClass
   - GeneralizedNewtypeDeriving
   - DeriveFunctor
 

@@ -2,8 +2,9 @@
 
 module Compute ( module Compute.Morphisms
                , module Compute.AST
-               , module Compute.Search ) where
+               , module Compute.Search) where
 
 import           Compute.AST
 import           Compute.Morphisms
 import           Compute.Search
+

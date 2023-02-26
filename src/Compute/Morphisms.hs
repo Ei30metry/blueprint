@@ -1,35 +1,41 @@
--- this modules purpose is to serve as a straightforward way to convert
+-- this module's purpose is to serve as a straightforward way to convert
 -- GHC intenral types to blueprint types.
 
 module Compute.Morphisms where
 
-import           GHC.Types.Name        ( OccName, mkOccName, tcName, varName )
-import           GHC.Types.Name.Reader ( GlobalRdrElt (..), GlobalRdrEnv (..),
-                                         Parent (..) )
+import           GHC.Types.Avail           ( AvailInfo (..), Avails (..) )
+import           GHC.Types.Name            ( OccName, mkOccName, tcName,
+                                             varName )
+import           GHC.Types.Name.Occurrence ( lookupOccEnv )
+import           GHC.Types.Name.Reader     ( GlobalRdrElt (..),
+                                             GlobalRdrEnv (..),
+                                             LocalRdrEnv (..), Parent (..),
+                                             lookupLocalRdrOcc, lookupGRE_Name_OccName, lookupGlobalRdrEnv )
 
-import           Types                 ( Entity (..), EntityOccDef, Func,
-                                         Scope (..), SearchEnv (..) )
+import Control.Monad.Trans.Reader (asks, ask)
+import           Types                     ( Entity (..), EntityOccDef, Func,
+                                             Scope (..), SearchEnv (..), TypeC (..) )
 
-scopeParent :: Scope -> GHC.Types.Name.Reader.Parent
-scopeParent (ParentS f _) = GHC.Types.Name.Reader.ParentIs undefined -- OccName mkNameSpace $ mkFastString f
-scopeParent (TopLevel _)  = GHC.Types.Name.Reader.NoParent
+-- scopeToParent :: Scope -> LocalRdrEnv -> Parent
+-- scopeToParent (ParentS f _) env = ParentIs $ OccName mkNameSpace $ mkFastString f
+-- scopeToParent (TopLevel _)  _ = NoParent
 
 
-entityToName :: Entity -> Maybe GHC.Types.Name.Reader.GlobalRdrElt
-entityToName = undefined
+-- entityToGlobalRdrElt :: SearchEnv -> Maybe GlobalRdrElt
+-- entityToGlobalRdrElt (DataTypeE t)   = undefined
+-- entityToGlobalRdrElt (FunctionE s _) = undefined
 
+--TODO check for WiredIn, External and Internal NameSorts
+-- entityToGlobalRdrElt :: BluePrint Entity w m (Maybe GlobalRdrElt)
+-- entityToGlobalRdrElt = do
+
+-- entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Maybe GlobalRdrElt
+entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> [GlobalRdrElt]
+entityToGlbRdrElt ent env = lookupGlobalRdrEnv env (occNameFromEntity ent)
 
 occNameFromEntity :: Entity -> OccName
 occNameFromEntity (DataTypeE t)   = mkOccName tcName $ typeName t
 occNameFromEntity (FunctionE s _) = mkOccName varName $ funcOccString s
-
-
-entityParent :: Entity -> GHC.Types.Name.Reader.Parent
-entityParent (FunctionE s _) = scopeParent s
-entityParent _               = GHC.Types.Name.Reader.NoParent
-
-typeName :: a
-typeName = undefined
 
 
 funcOccString :: Scope -> Func

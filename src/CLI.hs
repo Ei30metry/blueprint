@@ -29,7 +29,7 @@ parseCommand = subparser $ funcCommand <> typeCommand
 
 
 parseFuncCommand :: Parser Entity
-parseFuncCommand = FunctionE <$> (toScope <$> parseFunc <*> parseScope )<*> parseSignature -- FunctionE <$> parseFunc <*> parseScope <*> parseSignature
+parseFuncCommand = FunctionE <$> (toScope <$> parseFunc <*> parseScope ) <*> parseSignature -- FunctionE <$> parseFunc <*> parseScope <*> parseSignature
   where parseSignature = switch (long "type-signatures" <> short 'T' <> help "Get the blueprint of a function and show its type-signature")
         parseFunc = argument str (metavar "FUNCTION NAME")
         parseScope :: Parser (Maybe LocalFunc)

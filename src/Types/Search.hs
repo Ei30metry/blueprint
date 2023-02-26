@@ -1,3 +1,3 @@
-module Types.Search where
+module Types.Search(ASTEnv(..)) where
 
-import           Compute.Search ()
+import           Compute.Search (ASTEnv(..))

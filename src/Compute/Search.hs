@@ -1,4 +1,3 @@
--- |
 
 module Compute.Search where
 
@@ -33,7 +32,7 @@ data ASTEnv a = AEnv { _elemName     :: GlobalRdrElt
                      , _globalRdrEnv :: GlobalRdrEnv
                      , _renamedBinds :: HsValBinds a }
 
--- NOTE  for finding the actual Name
+-- NOTE for finding the actual Name
 -- NameSpace == Varname && NameSort == External ....
 -- lookupName :: GlobalRdrEnv -> String -> [Name]
 
@@ -43,9 +42,6 @@ makeLenses ''ASTEnv
 recurseImplementation :: Monad m => (GlobalRdrEnv, RenamedSource) -> m [a]
 recurseImplementation = undefined
 
-
-memoizeUsed :: Uniquable a => GlobalRdrElt -> M.Map a Name
-memoizeUsed = undefined
 
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]
 searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)

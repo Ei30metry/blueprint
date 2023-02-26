@@ -61,6 +61,8 @@ default-extensions:
   - EmptyCase
   - GeneralizedNewtypeDeriving
   - DeriveFunctor
+  - LambdaCase
+  - FlexibleContexts
 
 ghc-options:
 - -Wall

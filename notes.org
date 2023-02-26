@@ -122,6 +122,8 @@ data Bag a
   | ListBag [a]             -- INVARIANT: the list is non-empty
   deriving (Functor)
 #+end_src
+*** TcGblEnv
+TcGblEnv describes the top-level of the module at the point at which the typechecker is finished work.
 
 ** TODO Functions [15/16]
 + [ ] x_set
@@ -174,6 +176,5 @@ example:
 - Doing while loading the module
 - Filtering after the GlobalRdrEnv is constructed.
 ** Moand stack idea
-- Implicitly passing GhcEnv using by giving it a Monoid instance and using it as the logging data in the Writer monad
 
 * IDEA Running a computation inside GHC using CPS

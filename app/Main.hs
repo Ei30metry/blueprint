@@ -2,14 +2,17 @@ module Main where
 
 import           App                    ( runBluePrint )
 
-import           Blueprint              ( initializeGhc, prototypeFunc )
+import           Blueprint              ( initializeGhc, prototypeFunc, rnTest )
 
 import           CLI                    ( parseSearchEnv )
 
 import           Compute                ( parseSourceFile )
 
 import           Control.Applicative    ( (<**>) )
+import           Control.Monad          ( replicateM_ )
 import           Control.Monad.IO.Class ( liftIO )
+
+import           Data.IORef
 
 import           GHC                    ( ParsedModule (pm_parsed_source),
                                           runGhcT, unLoc )
@@ -25,10 +28,16 @@ import           Types                  ( SearchEnv (..) )
 
 main :: IO ()
 main = runGhcT (Just libdir) $ do
-  modSum <- initializeGhc "/Users/artin/Programming/projects/blueprint/test/golden/Golden5.hs"
-  (result, _) <- runBluePrint (parseSourceFile @String) modSum
-  liftIO . print . showPprUnsafe . unLoc . pm_parsed_source $ result
+  sEnv <- liftIO getSearchEnv
+  let ent = entity sEnv
+  let filePath = modPath sEnv
+  modSum <- initializeGhc filePath
+  (result, _) <- runBluePrint (rnTest @String ent) modSum
+  -- liftIO . print . showPprUnsafe . unLoc . pm_parsed_source $ result
+  liftIO . print . showPprUnsafe $ result
 
+-- main :: IO ()
+-- main = getSearchEnv >>= print
 
 
 printBindings :: FilePath -> IO ()

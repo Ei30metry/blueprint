@@ -7,4 +7,3 @@ module Compute ( module Compute.Morphisms
 import           Compute.AST
 import           Compute.Morphisms
 import           Compute.Search
-

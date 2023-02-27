@@ -36,6 +36,9 @@ import           GHC.Utils.Panic                   ( panic )
 import           Language.Haskell.Syntax.Binds     ( HsValBinds )
 import           Language.Haskell.Syntax.Extension ( IdP )
 import Types
+import GHC.Types.Name.Set (DefUses)
+import GHC.Tc.Utils.Monad (TcGblEnv(tcg_dus, tcg_used_gres), TcRef)
+import GHC.Plugins (Outputable)
 
 
 mkFileModName :: FilePath -> String
@@ -82,6 +85,14 @@ rnTest ent = BT $ do
   parsed <- unBluePrint parseSourceFile
   (glb,_) <- lift . lift $ rnWithGlobalEnv' parsed
   lift . lift . return $ entityToGlbRdrElt ent glb
+
+
+seeFromTcGblEnv :: forall w s m. (GhcMonad m, Monoid w) => (TcGblEnv -> s) -> BluePrint ModSummary w m s
+seeFromTcGblEnv fieldSelector = BT $ do
+  parsed <- unBluePrint parseSourceFile
+  lift . lift $ return . fieldSelector . tcModuleToTcGblEnv <=< typecheckModule $ parsed
+
+
 -- rnTest ent = do
 --   parsed <- parseSourceFile
 --   (glb,_) <- lift $ rnWithGlobalEnv' parsed

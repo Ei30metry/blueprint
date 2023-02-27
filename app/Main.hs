@@ -2,7 +2,8 @@ module Main where
 
 import           App                    ( runBluePrint )
 
-import           Blueprint              ( initializeGhc, prototypeFunc, rnTest )
+import           Blueprint              ( initializeGhc, prototypeFunc, rnTest,
+                                          seeFromTcGblEnv)
 
 import           CLI                    ( parseSearchEnv )
 
@@ -16,13 +17,21 @@ import           Data.IORef
 
 import           GHC                    ( ParsedModule (pm_parsed_source),
                                           runGhcT, unLoc )
+import           GHC.Data.OrdList       ( fromOL )
 import           GHC.Paths              ( libdir )
-import           GHC.Utils.Outputable   ( showPprUnsafe )
+import           GHC.Utils.Outputable   ( SDoc (..), defaultDumpStyle,
+                                          defaultSDocContext, defaultUserStyle,
+                                          ppr, printSDocLn, showPprUnsafe )
+import           GHC.Utils.Ppr          ( style, Mode (PageMode) )
 
 import           Options.Applicative    ( execParser, fullDesc, header, helper,
                                           info, progDesc )
 
+import           System.IO              ( stdout )
+
 import           Types                  ( SearchEnv (..) )
+import Result (banner)
+import GHC.Tc.Types (TcGblEnv(..))
 
 
 
@@ -32,12 +41,13 @@ main = runGhcT (Just libdir) $ do
   let ent = entity sEnv
   let filePath = modPath sEnv
   modSum <- initializeGhc filePath
-  (result, _) <- runBluePrint (rnTest @String ent) modSum
+  (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
+  (result2, _) <- runBluePrint (seeFromTcGblEnv @String tcg_used_gres ) modSum
+  result' <- liftIO $ readIORef result2
   -- liftIO . print . showPprUnsafe . unLoc . pm_parsed_source $ result
-  liftIO . print . showPprUnsafe $ result
-
--- main :: IO ()
--- main = getSearchEnv >>= print
+  liftIO . printSDocLn defaultSDocContext (PageMode True) stdout . ppr $ result
+  liftIO . putStrLn $ banner "tcg_used_gres"
+  liftIO $ mapM_ (printSDocLn defaultSDocContext (PageMode True) stdout . ppr) result'
 
 
 printBindings :: FilePath -> IO ()

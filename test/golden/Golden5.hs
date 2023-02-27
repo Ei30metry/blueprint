@@ -33,4 +33,4 @@ fPrime f'' g = g . f''
 
 
 fPrimeWithApplication :: (Int -> Int) -> Int
-fPrimeWithApplication fPrime = fPrime 4
+fPrimeWithApplication t = t 4

@@ -1,8 +1,7 @@
 #+title: Notes
 #+author: Artin Ghasivand
 
-* TODO To Learn about [0/3]
-
+* TODO To Learn about [0/6]
 ** TODO Types [0/0]
 *** OccName
 occNameSpace :: [[NameSpace]]
@@ -111,7 +110,7 @@ data HsBindLR idL idR = FunBind ...
                       | PatBind ...
                       | VarBind ...
 #+end_src
-
+*** TyThing
 *** Bag
 Bag: an unordered collection with duplicates
 #+begin_src haskell
@@ -124,6 +123,13 @@ data Bag a
 #+end_src
 *** TcGblEnv
 TcGblEnv describes the top-level of the module at the point at which the typechecker is finished work.
+
+important fields:
+**** tcg_dus
+Records what is defined in this module and what is used
+**** tcg_used_gres
+Records occurences of imported entities
+**** tcg_keep
 
 ** TODO Functions [15/16]
 + [ ] x_set
@@ -154,6 +160,51 @@ TcGblEnv describes the top-level of the module at the point at which the typeche
 4. go one level deeper in HsGroup
 5. lookup all the gathered Names of our bindings in our located HsValBinds
 6. recurse
+** TODO Typechecker [1/39]
++ [ ] tcRnSrcDecls
++ [ ] ModuleSet
++ [ ] tcRnModule
++ [ ] tcRnModuleTcRnM
++ [ ] rnTopSrcDecls
++ [ ] tcTopSrcDecls
++ [X] [[TcGblEnv]]
++ [ ] addTopDecls
++ [ ] tcTyAndClassDecls
++ [ ] tcInstanceDecls1
++ [ ] tcForeignImports
++ [ ] tcDefaults
++ [ ] tcTopBinds
++ [ ] kcTyClDecls
++ [ ] [[TyThing]]
++ [ ] instOverloadedFun
++ [ ] TcRn
++ [ ] NameEnv
++ [ ] TypeEnv
++ [ ] TcTyThing
++ [ ] UsageEnv
++ [ ] TcLclEnv
++ [ ] [[DefUses]]
++ [ ] [[NameSet]]
++ [ ] RhsNames
++ [ ] EvBind
++ [ ] tcg_binds
++ [ ] tcLookupGlobal
++ [ ] tcRnImports
++ [ ] ModGuts
++ [ ] tcg_keep
++ [ ] tcg_dus
++ [ ] tcg_used_gres
++ [ ] tcg_th_used
++ [ ] reportUnusedNames
++ [ ] mkUsedNames
++ [ ] pickGREs
++ [ ] Bag
++ [ ] mkDependencies
+** TODO Source Notes [0/3]
++ [ ] Identity versus semantic module
++ [ ] Tracking unused binding and imports
++ [ ] The Global-Env/Local-Env story
+
 * TODO GHC conventions
 ** Strict Annotation
 The reason we might sometimes have proper data constructors with their parameter being strict is that they might, in some passes, \beta-reduce to DataConCantHappen and being strict helps the pattern matching analyzer to realize we don't need to pattern match over those constructors

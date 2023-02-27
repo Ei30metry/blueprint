@@ -47,7 +47,7 @@ import           GHC.Hs.Utils                      ( CollectFlag (..),
                                                      spanHsLocaLBinds )
 import           GHC.Parser.Annotation             ()
 import           GHC.Tc.Module
-import           GHC.Tc.Types                      ( TcGblEnv (..) )
+import           GHC.Tc.Types                      ( TcGblEnv (..), TcRn(..) )
 import           GHC.Tc.Utils.Monad
 import           GHC.Types.Basic                   ( RecFlag )
 import           GHC.Types.Name                    ( Name (..) )
@@ -68,8 +68,11 @@ parseSourceFile :: forall w m. (Monoid w, GhcMonad m) => BluePrint ModSummary w 
 parseSourceFile = BT $ ask >>= \modSum -> lift . lift $ parseModule modSum
 
 
+tcModuleToTcGblEnv :: TypecheckedModule -> TcGblEnv
+tcModuleToTcGblEnv = fst . tm_internals_
+
 typeCheckedToGlbEnv :: TypecheckedModule -> GlobalRdrEnv
-typeCheckedToGlbEnv = tcg_rdr_env . fst . tm_internals_
+typeCheckedToGlbEnv = tcg_rdr_env . tcModuleToTcGblEnv
 
 
 -- TODO find out in what circumstatnces we have a Nothing value instead of renamed source

@@ -42,6 +42,7 @@ dependencies:
 
 default-extensions:
   - AllowAmbiguousTypes
+  - PatternSynonyms
   - MultiParamTypeClasses
   - GADTs
   - ScopedTypeVariables

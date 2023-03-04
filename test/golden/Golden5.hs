@@ -9,8 +9,21 @@ g :: String -> Int
 g = read
 
 
+g' :: String -> Int
+g' = g
+
+g'' :: String -> Int
+g'' = g'
+
 f' :: Int -> Int
 f' = g . f
+
+
+l :: Int -> Int
+l = g . f
+
+test12 :: Int -> String
+test12 = show . (+1) . id . f'
 
 
 f'' :: Int -> String
@@ -19,7 +32,7 @@ f'' = f . f1
 
 
 test1 :: Int -> String
-test1 = show . (+1). id . f'
+test1 = show . (+1) . id . f'
 
 test1' :: String -> Int
 test1' = (+2) . read . test1 . read

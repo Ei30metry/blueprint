@@ -5,13 +5,14 @@ GUI client for Blueprint
 
 module Blueprint where
 
-import App ( BluePrint(..) )
+import           App                               ( BluePrint (..) )
 
 import           Compute
 
 import           Control.Monad                     ( (<=<) )
-import           Control.Monad.Trans               ( lift, liftIO, MonadTrans )
-import           Control.Monad.Trans.Reader        ( ReaderT, ask, mapReaderT, withReaderT, local )
+import           Control.Monad.Trans               ( MonadTrans, lift, liftIO )
+import           Control.Monad.Trans.Reader        ( ReaderT, ask, local,
+                                                     mapReaderT, withReaderT )
 import           Control.Monad.Trans.Writer.Lazy   ( WriterT )
 
 import           GHC                               ( Backend (NoBackend),
@@ -30,15 +31,18 @@ import           GHC                               ( Backend (NoBackend),
                                                      setSessionDynFlags,
                                                      setTargets,
                                                      typecheckModule )
-import           GHC.Types.Name.Reader             ( GlobalRdrEnv(..), GlobalRdrElt )
+import           GHC.Plugins                       ( Outputable )
+import           GHC.Tc.Utils.Monad                ( TcGblEnv (tcg_dus, tcg_used_gres),
+                                                     TcRef )
+import           GHC.Types.Name.Reader             ( GlobalRdrElt,
+                                                     GlobalRdrEnv (..) )
+import           GHC.Types.Name.Set                ( DefUses )
 import           GHC.Utils.Panic                   ( panic )
 
 import           Language.Haskell.Syntax.Binds     ( HsValBinds )
 import           Language.Haskell.Syntax.Extension ( IdP )
-import Types
-import GHC.Types.Name.Set (DefUses)
-import GHC.Tc.Utils.Monad (TcGblEnv(tcg_dus, tcg_used_gres), TcRef)
-import GHC.Plugins (Outputable)
+
+import           Types
 
 
 mkFileModName :: FilePath -> String

@@ -1,10 +1,18 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs     #-}
-{-# LANGUAGE PolyKinds #-}
-module Golden2 where
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE GADTs               #-}
+{-# LANGUAGE PatternSynonyms     #-}
+{-# LANGUAGE PolyKinds           #-}
+{-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE TypeOperators       #-}
+
+
+module Golden2(extremeT, extremeTest, T(..), Header(NameH, DateH)) where
 
 
 import           Data.List                     ( sortOn )
+
+import           GHC.Float                     ( int2Double )
 
 import           Text.Parsec                   ( alphaNum )
 import           Text.Parsec.Char              ( newline )
@@ -253,3 +261,71 @@ parseEntry = do
  where listOfParsers = [ parseName, parseDate, parseMoodReports, parseSleep
                        , parseAlcohol, parseMeditations, parseCigarette
                        , parseProductivity, parseRating ]
+
+
+data Type'' = App String [Type'']
+
+collectArgs :: Type'' -> [Type'']
+collectArgs (App "->" [t1, t2]) = t1 : collectArgs t2
+collectArgs _                   = []
+
+isInt :: Type'' -> Bool
+isInt (App "Int" []) = True
+isInt _              = False
+
+isIntEndo :: Type'' -> Bool
+isIntEndo (App "->" [App "Int" [], App "Int" []]) = True
+isIntEndo _                                       = False
+
+
+pattern Arrow t1 t2 = App "->" [t1, t2]
+pattern Int'' = App "Int" []
+pattern Maybe t = App "Maybe" [t]
+
+collectArgs' :: Type'' -> [Type'']
+collectArgs' (Arrow t1 t2) = t1 : collectArgs t2
+collectArgs' _             = []
+
+isInt' :: Type'' -> Bool
+isInt' Int'' = True
+isInt' _     = False
+
+isIntEndo' :: Type'' -> Bool
+isIntEndo' (Arrow Int'' Int'') = True
+isIntEndo' _                   = False
+
+
+class T a where
+  type D a
+  mkT :: (Functor f, Applicative f) => a -> f (D a)
+  mkTCo :: (Foldable f, Functor f) => f (D a) -> a
+
+
+instance T Int where
+  type D Int = Int
+  mkT = pure
+  mkTCo = sum
+
+type family AnotherT a where
+  AnotherT Int = String
+  AnotherT String = Int
+  AnotherT _ = [Int]
+
+
+extremeTest :: (T a, a ~ Int) => AnotherT a -> a
+extremeTest = const 5
+
+
+-- extremeT :: (T a, Num a) => a -> a
+extremeT :: (T a, Applicative f, Num (D a)) => a -> f (D a)
+extremeT = id . fmap (+5) . id . mkT
+
+data Core b = Var String
+            | Lit String
+            | Apply (Core b) String
+            | Lam b (Core b)
+            | Case (Core b) b [b]
+            | Cast (Core b) Int
+            | Tick b b
+            | Ty b
+            | Coercion b

@@ -1,7 +1,6 @@
-
 module Compute.Search where
 
-import           App                      ()
+import           App (BluePrint(..), runBluePrint)
 
 import           Compute.AST              ()
 import           Compute.Morphisms        ( occNameFromEntity )
@@ -22,10 +21,11 @@ import           GHC.Types.Avail          ()
 import           GHC.Types.Name           ( Name (..) )
 import           GHC.Types.Name.Reader    ( GlobalRdrElt, GlobalRdrEnv,
                                             lookupGlobalRdrEnv )
-import           GHC.Types.Name.Set       ()
+import           GHC.Types.Name.Set       ( DefUse, DefUses, Defs, NameSet,
+                                            Uses )
 import           GHC.Types.Unique         ( Uniquable (..) )
 
-import           Types                    ( SearchEnv (..) )
+import           Types                    ( SearchEnv (..) , Entity(..))
 
 
 data ASTEnv a = AEnv { _elemName     :: GlobalRdrElt
@@ -45,3 +45,7 @@ recurseImplementation = undefined
 
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]
 searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)
+
+
+searchInDefUses :: forall w m. DefUses -> BluePrint Entity w m DefUse
+searchInDefUses = undefined

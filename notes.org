@@ -1,8 +1,8 @@
 #+title: Notes
 #+author: Artin Ghasivand
 
-* TODO To Learn about [0/6]
-** TODO Types [0/0]
+* TODO To Learn about [1/5]
+** DONE Types [0/0]
 *** OccName
 occNameSpace :: [[NameSpace]]
 occNameFs    :: FastString
@@ -131,13 +131,12 @@ Records what is defined in this module and what is used
 Records occurences of imported entities
 **** tcg_keep
 
-** TODO Functions [15/16]
-+ [ ] x_set
+** TODO Functions [17/17]
++ [X] x_set
 + [X] hscTypeCheckRename
 + [X] typecheckModule
 + [X] parseModule
 + [X] hsc_typcheckandRename
-+ [X] rnSrcDecls
 + [X] applyNameMaker
 + [X] mkUnboundName
 + [X] mkUnboundNameRdr
@@ -148,10 +147,10 @@ Records occurences of imported entities
 + [X] pprDefindAt
 + [X] nameSrcLoc
 + [X] getOccString
++ [X] getMangledName
 
 ** TODO Type classes [0/2]
 + [ ] HasOccName
-
 
 *** Algorithm
 1. use Entity to find the GlobalRdrElt
@@ -160,7 +159,7 @@ Records occurences of imported entities
 4. go one level deeper in HsGroup
 5. lookup all the gathered Names of our bindings in our located HsValBinds
 6. recurse
-** TODO Typechecker [1/39]
+** TODO Typechecker [5/51]
 + [ ] tcRnSrcDecls
 + [ ] ModuleSet
 + [ ] tcRnModule
@@ -191,19 +190,33 @@ Records occurences of imported entities
 + [ ] tcLookupGlobal
 + [ ] tcRnImports
 + [ ] ModGuts
-+ [ ] tcg_keep
-+ [ ] tcg_dus
++ [X] tcg_keep
++ [X] tcg_dus
 + [ ] tcg_used_gres
-+ [ ] tcg_th_used
-+ [ ] reportUnusedNames
++ [X] tcg_th_used
++ [X] reportUnusedNames
 + [ ] mkUsedNames
 + [ ] pickGREs
 + [ ] Bag
 + [ ] mkDependencies
-** TODO Source Notes [0/3]
++ [ ] extendGlobalRdrEnvRn
++ [ ] getLocalNonValBinders
++ [ ] rnTopBindsBoot
++ [ ] addTcgDUs
++ [ ] rnSrcDecls
++ [ ] MinFixityTyEnv
++ [ ] collectHSIdBinders
++ [ ] getLocalNonValBinders
++ [ ] rnTopBindsLHS
++ [ ] rnValBindsRHS
++ [ ] rnTopBindsBoot
+** TODO Source Notes [0/6]
 + [ ] Identity versus semantic module
 + [ ] Tracking unused binding and imports
 + [ ] The Global-Env/Local-Env story
++ [ ] SrcSpan for binders
++ [ ] restoreLclEnv vs SetLclEnv
++ [ ] Deterministic UniqFM
 
 * TODO GHC conventions
 ** Strict Annotation
@@ -211,14 +224,7 @@ The reason we might sometimes have proper data constructors with their parameter
 
 example:
 
-
 ** Extensions
-* TODO Jan 11
-** Steps
-1. figure out how [[Name]] are gathered.
-2. find th first function that converts [[RdrName]] to [[Name]].
-3. figure out how you are suppose to [[Name]] data from [[HsGroup]]
-4. get some data strucutre of all the gathered [[Name]] after the renamer is ran.
 
 * TODO Implementation details [0/0]
 - converting 'Entity' to 'GlobalRdrElt' is redundant and instead, I should try to find the closest 'GlobalRdrElt' corresponding to the 'Entity'
@@ -228,4 +234,4 @@ example:
 - Filtering after the GlobalRdrEnv is constructed.
 ** Moand stack idea
 
-* IDEA Running a computation inside GHC using CPS
+* TODO Running a computation inside GHC using CPS

@@ -1,5 +1,10 @@
 module Golden5 where
 
+import qualified Data.Text as T
+import qualified Golden2 as G
+import qualified Golden2 as GG
+import qualified Golden6 as L
+
 f :: Int -> String
 f = g
   where g = show . (+2)
@@ -8,6 +13,16 @@ f = g
 g :: String -> Int
 g = read
 
+
+pack :: String
+pack = undefined
+
+
+pack' :: String -> T.Text
+pack' = T.pack
+
+pack'' :: String
+pack'' = G.pack
 
 g' :: String -> Int
 g' = g

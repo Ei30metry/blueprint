@@ -7,7 +7,7 @@
 {-# LANGUAGE TypeOperators       #-}
 
 
-module Golden2(extremeT, extremeTest, T(..), Header(NameH, DateH)) where
+module Golden2(extremeT, extremeTest, T(..), Header(NameH, DateH), pack) where
 
 
 import           Data.List                     ( sortOn )
@@ -329,3 +329,5 @@ data Core b = Var String
             | Tick b b
             | Ty b
             | Coercion b
+
+pack = undefined

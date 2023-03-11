@@ -157,6 +157,13 @@ test-suite blueprint-test
   type: exitcode-stdio-1.0
   main-is: Tests.hs
   other-modules:
+      Golden.Golden1
+      Golden.Golden2
+      Golden.Golden3
+      Golden.Golden4
+      Golden.Golden5
+      Golden.Golden6
+      Golden.Golden7
       Test
       Paths_blueprint
   hs-source-dirs:

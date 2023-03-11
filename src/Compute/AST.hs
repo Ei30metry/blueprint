@@ -1,10 +1,14 @@
 module Compute.AST where
 
 import           App                               ( BluePrint (..), bluePrint )
+import Data.List (find)
+import qualified Data.IntMap.Lazy as IM
+import Data.Functor.Classes ( eq1 )
+import Data.Functor ((<&>))
 
 import           Control.Lens.Combinators          ( Field1 (_1), view )
 import Data.Bifunctor (first)
-import           Control.Monad                     ( liftM, void, (<=<) )
+import           Control.Monad                     ( liftM, void, (<=<), join )
 import           Control.Monad.IO.Class            ( liftIO )
 import           Control.Monad.Trans               ( MonadTrans (..) )
 import           Control.Monad.Trans.Reader        ( ReaderT, ask, asks, local,
@@ -57,7 +61,7 @@ import           GHC.Hs.Utils                      ( CollectFlag (..),
                                                      collectHsValBinders,
                                                      spanHsLocaLBinds )
 import           GHC.Parser.Annotation             ()
-import           GHC.Plugins                       ( Outputable, Defs )
+import           GHC.Plugins                       ( Outputable, Defs, lookupUniqSet, sizeUniqSet )
 import           GHC.Tc.Module
 import           GHC.Tc.Types                      ( TcGblEnv (..), TcRn (..) )
 import           GHC.Tc.Utils.Monad
@@ -78,6 +82,7 @@ import           Types                             ( Entity (..),
                                                      OutputType (..),
                                                      Scope (..), SearchEnv (..),
                                                      SearchLevel (..) )
+import Compute.Morphisms (getEntityOccString, occNameFromEntity )
 
 parseSourceFile :: forall w m. (Monoid w, GhcMonad m) => BluePrint ModSummary w m ParsedModule
 parseSourceFile = BT $ ask >>= \modSum -> lift . lift $ parseModule modSum
@@ -112,7 +117,7 @@ rnWithGlobalEnv' = return . glbWithRenamed <=< typecheckModule
 
 
 rnSrcToBindsBP :: forall m w. (GhcMonad m, Monoid w) => BluePrint RenamedSource w m (HsValBinds GhcRn)
-rnSrcToBindsBP = BT $ ask >>= lift . lift . return . hs_valds . view _1
+rnSrcToBindsBP = BT $ ask <&> hs_valds . view _1
 
 -- not exported by ghc-lib, so we define it locally
 data DataConCantHappen
@@ -137,6 +142,13 @@ newtype BluePrintAST = BAST {unBAST :: Tree (Maybe Defs, Uses)}
 
 -- TODO Entity -> Maybe GlobalRdrElt -> Maybe Name -> lookup in DefUses
 -- TODO find a way to test in repl without having to complete all the fucking thing.
-searchInDefs :: forall w m. DefUses -> BluePrint Entity w m DefUse
-searchInDefs defUses = do
-  undefined
+-- searchInDefs :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint Entity w m Int -- [Maybe DefUse]
+-- searchInDefs defUses = BT $ do
+--     let definitions = toBinds $ fromOL defUses
+--     toSearchFor <- ask
+--     -- let res = searchFor toSearchFor definitions
+--     return 2
+--   where
+--     toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
+--     searchFor ent = mapM (fmap (`lookupUniqSet` entityToName ent) . fst)
+    -- searchFor ent defs = length $ fmap (fmap (  ))

@@ -84,7 +84,7 @@ prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd <=
 -- rnTest :: forall w m. (Monad m, Monoid w, GhcMonad m) => Entity -> BluePrint ModSummary w m [GlobalRdrElt]
 -- rnTest :: forall w m. (Monad m, Monoid w, GhcMonad m) => Entity -> BluePrint ModSummary w m [GlobalRdrEnv]
 -- rnTest :: BluePrint ModSummary w m [GlobalRdrEnv]
-rnTest :: forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint ModSummary w m [GlobalRdrElt]
+rnTest :: forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint ModSummary w m (Maybe GlobalRdrElt)
 rnTest ent = BT $ do
   parsed <- unBluePrint parseSourceFile
   (glb,_) <- lift . lift $ rnWithGlobalEnv' parsed

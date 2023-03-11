@@ -45,7 +45,7 @@ important stuff:
     - [[GreName]]
 
 #+begin_src haskell
-GRE { gre_name :: [[GreName]]
+GRE { gre_name :: GreName
     , gre_par  :: Parent
     , gre_lcl  :: Bool
     , gre_imp  :: Bag ImportSpec }
@@ -229,9 +229,39 @@ example:
 * TODO Implementation details [0/0]
 - converting 'Entity' to 'GlobalRdrElt' is redundant and instead, I should try to find the closest 'GlobalRdrElt' corresponding to the 'Entity'
 
+** Chosing the right GreName
+If we we are looking for something like `pack` and we have multiple versions of it imporeted and defined; if it is in the RHS of our bind, we should look to see if it's from a library and if it is, we should be looking further for it. because of the fact that we can import the same `Name` from multiple modules, the names that are the same thing will be put in a list. Take the code below as an example:
+
+blueprint-exe function pack "test/Golden/Golden5.hs"
+
+#+begin_src haskell
+main :: IO ()
+main = runGhcT (Just libdir) $ do
+    sEnv <- liftIO getSearchEnv
+    let ent = entity sEnv
+    let filePath = modPath sEnv
+    modSum <- initializeGhc filePath
+    parsed <- parseModule modSum
+    gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
+    let glbRdrElt = entityToGlbRdrElts ent gblEnv
+    let modNames = mconcat $ fmap (fmap (is_mod . is_decl) . gre_imp) glbRdrElt
+    modSummaries <- mgModSummaries <$> getModuleGraph
+    hsc <- getSession
+    -- liftIO . putStrLn $ banner "One by One"
+    liftIO . putStrLn $ banner "One"
+    liftIO . defPrint . ppr $ (map (is_mod . is_decl) . gre_imp) $ head glbRdrElt -- [Data.Text]
+    liftIO . putStrLn $ banner "Two"
+    liftIO . defPrint . ppr $ (map (is_mod . is_decl) . gre_imp) $ glbRdrElt !! 1 -- [Golden6, Golden2, Golden2]
+    liftIO . putStrLn $ banner "Three"
+    liftIO . defPrint . ppr $ (map (is_mod . is_decl) . gre_imp) $ glbRdrElt !! 2 -- []
+#+end_src
+"[ [Data.Text], [Golden6, Golden2, Golden2], [[]] ]" states that we have 3 `pack`s in scope, one of them was imported from Data.Text, one of them was imported from Golden2, Golden2 and Golden6 (they are all the same thing) and one of them was defined locally, i.e, not imported.
 ** checking to see if the module is in the packages or defined by the user
-- Doing while loading the module
-- Filtering after the GlobalRdrEnv is constructed.
+*** TODO Use this logic for the recursion in NameSets
+1. Construct GlobalRdrEnv
+2. Search fot the GlobalRdrElt that you wnt
+3. Figure which one belongs to the home unit and is not imported from a library
+
 ** Moand stack idea
 
-* TODO Running a computation inside GHC using CPS
+* DONE Running a computation inside GHC using CPS

@@ -1,3 +1,4 @@
 .stack-work/
 *~
 roadmap.org
+*.DS_Store

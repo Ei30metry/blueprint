@@ -1,53 +1,44 @@
 {-
-This module should be the only module we will need in order to make a
-GUI client for Blueprint
+This module is the frontend to all the functionalities provided by blueprint and
+should be the only module needed in order to make a GUI client for Blueprint
 -}
 
 module Blueprint where
 
-import           App                               ( BluePrint (..) )
+import           App                           ( BluePrint (..) )
 
-import           Compute
+import           Compute.AST                   ( parseSourceFile,
+                                                 rnWithGlobalEnv',
+                                                 tcModuleToTcGblEnv,
+                                                 valBindsToHsBinds )
+import           Compute.Morphisms             ( entityToGlbRdrElt )
 
-import           Control.Monad                     ( (<=<) )
-import           Control.Monad.Trans               ( MonadTrans, lift, liftIO )
-import           Control.Monad.Trans.Reader        ( ReaderT, ask, local,
-                                                     mapReaderT, withReaderT )
-import           Control.Monad.Trans.Writer.Lazy   ( WriterT )
+import           Control.Monad                 ( (<=<) )
+import           Control.Monad.Trans           ( lift )
 
-import           GHC                               ( Backend (NoBackend),
-                                                     GhcMonad (..),
-                                                     GhcPass (GhcRn), GhcRn,
-                                                     HsGroup (hs_valds),
-                                                     LoadHowMuch (..),
-                                                     ModSummary (..), Name (..),
-                                                     ParsedModule (ParsedModule),
-                                                     RenamedSource, backend,
-                                                     getModSummary, getSession,
-                                                     getSessionDynFlags,
-                                                     guessTarget, hs_valds,
-                                                     load, mkModuleName,
-                                                     parseModule,
-                                                     setSessionDynFlags,
-                                                     setTargets,
-                                                     typecheckModule )
-import           GHC.Plugins                       ( Outputable )
-import           GHC.Tc.Utils.Monad                ( TcGblEnv (tcg_dus, tcg_used_gres),
-                                                     TcRef )
-import           GHC.Types.Name.Reader             ( GlobalRdrElt,
-                                                     GlobalRdrEnv (..) )
-import           GHC.Types.Name.Set                ( DefUses )
-import           GHC.Utils.Panic                   ( panic )
+import           GHC                           ( Backend (NoBackend),
+                                                 GhcMonad (..), GhcRn,
+                                                 HsGroup (hs_valds),
+                                                 LoadHowMuch (..),
+                                                 ModSummary (..), Name (..),
+                                                 RenamedSource, backend,
+                                                 getModSummary, getSession,
+                                                 getSessionDynFlags,
+                                                 guessTarget, hs_valds, load,
+                                                 mkModuleName, parseModule,
+                                                 setSessionDynFlags, setTargets,
+                                                 typecheckModule, ParsedModule (ParsedModule) )
+import           GHC.Tc.Types                  ( TcGblEnv(..) )
+import           GHC.Types.Name.Reader         ( GlobalRdrElt )
+import           GHC.Types.Name.Set            ( DefUses )
 
-import           Language.Haskell.Syntax.Binds     ( HsValBinds )
-import           Language.Haskell.Syntax.Extension ( IdP )
+import           Language.Haskell.Syntax.Binds ( HsValBinds )
 
-import           Types
+import           Types                         ( Entity )
 
 
 mkFileModName :: FilePath -> String
 mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)
-
 
 initializeGhc :: GhcMonad m => FilePath -> m ModSummary
 initializeGhc filePath = do
@@ -81,9 +72,6 @@ prototypeFunc :: GhcMonad m => FilePath -> m [Name]
 prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd <=< rnWithGlobalEnv' <=< parseSourceFile' LoadAllTargets
 
 
--- rnTest :: forall w m. (Monad m, Monoid w, GhcMonad m) => Entity -> BluePrint ModSummary w m [GlobalRdrElt]
--- rnTest :: forall w m. (Monad m, Monoid w, GhcMonad m) => Entity -> BluePrint ModSummary w m [GlobalRdrEnv]
--- rnTest :: BluePrint ModSummary w m [GlobalRdrEnv]
 rnTest :: forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint ModSummary w m (Maybe GlobalRdrElt)
 rnTest ent = BT $ do
   parsed <- unBluePrint parseSourceFile
@@ -99,9 +87,3 @@ seeFromTcGblEnv fieldSelector = BT $ do
 
 seeDefUses :: forall w m. (GhcMonad m, Monoid w) => BluePrint ModSummary w m DefUses
 seeDefUses = seeFromTcGblEnv tcg_dus
-
--- rnTest ent = do
---   parsed <- parseSourceFile
---   (glb,_) <- lift $ rnWithGlobalEnv' parsed
---   let x = lift . lift $ entityToGlbRdrElt ent glb
---   x

@@ -60,22 +60,8 @@ makeLenses ''CompEnv
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]
 searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)
 
--- Unsafe Type Synonym for telling the user that the NameSet should have 1 and only 1 element in it
+-- NOTE Unsafe Type Synonym for telling the user that the NameSet should have 1 and only 1 element in it
 type Def = Defs
-
-
--- -- testBuild :: Name -> DefUses ->  [(Name, [Name])]
--- -- testBuild :: Name -> DefUses -> [(Name, Module)]
--- testBuild :: Name -> DefUses -> [[(Name, Module)]]
-testBuild _ defUses = map (map (\x -> (x, moduleUnit $ nameModule x)) . snd) names
-  where final = mapM helper definitions
-        helper (Nothing, _) = Nothing
-        helper (Just x, y)  = Just (x, y)
-        toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
-        definitions = toBinds $ fromOL defUses
-        names = bimap (head . nonDetEltsUniqSet) nonDetEltsUniqSet <$> fromJust final
-        -- withNameSortInfo list = map snd list
-
 
 buildUsageTree :: Name -> [(Def, Uses)] -> Maybe (BluePrintAST Name)
 buildUsageTree name [] = Just (pure name)

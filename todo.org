@@ -1,0 +1,20 @@
+#+title: Todo
+#+author: Artin Ghasivand
+
+
+* TODO Things to polish before realising Version 1 [0/15]
++ [ ] Replace String with Text in all of the codebase
++ [ ] Add Unit tests
++ [ ] Add Property tests
++ [ ] Add Golden tests
++ [ ] Do Performance checks
++ [ ] Wrap the current monad stack in ExceptT and make the codebase free of Maybe
++ [ ] Give better error messages
++ [ ] Mark safe and unsafe algorithms
++ [ ] Make all the imports and exports explicits
++ [ ] Fix the problem with libraries
++ [ ] Make functions more GHCi friendly
++ [ ] Update the README File
++ [ ] Add a new minimal output type
++ [ ] Try to make everything more Algebraic and composable
++ [ ] Add Haddock documentation

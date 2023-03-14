@@ -1,14 +1,14 @@
-module Types(Entity(..), SearchEnv(..)
+module Types( Entity(..), SearchEnv(..)
             , Scope(..), SearchLevel(..)
-            , TypeC(..), EntityOccDef, ParentFunc, Func, LocalFunc, OutputType(..), Print(..)) where
+            , TypeC(..), EntityOccDef
+            , ParentFunc, Func
+            , LocalFunc, OutputType(..)
+            , Print(..)) where
 
 
 data Entity = FunctionE Scope Bool
             | DataTypeE TypeC
             deriving (Show, Eq)
-
--- data Entity = FunctionE Scope Bool
---             | DataTypeE TypeC deriving (show, Eq)
 
 data TypeC = TypeC { typeName       :: String
                    , reduceSynonyms :: Bool   } deriving (Show, Eq)
@@ -35,7 +35,6 @@ data OutputType = Image FilePath
                 | SourceCode Print
                 deriving (Show, Eq)
 
--- TODO Add a parameterinorder to determine output type, like pdf or image or source code
 data SearchEnv = SEnv { entity     :: Entity      -- The thing we are searching for
                       , levels     :: SearchLevel -- The levels to go down in AST
                       , withColor  :: Bool        -- Syntax highlighting

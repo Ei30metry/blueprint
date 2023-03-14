@@ -1,3 +1,4 @@
-module Types.AST where
+module Types.AST ( DataConCantHappen
+                 , BluePrintAST(..)) where
 
-import           Compute.AST ()
+import           Compute.AST (DataConCantHappen, BluePrintAST(..))

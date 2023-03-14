@@ -94,6 +94,7 @@ library
     , parallel
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , stack
     , text
     , transformers
     , vector
@@ -154,6 +155,7 @@ executable blueprint-exe
     , parallel
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , stack
     , text
     , transformers
     , vector
@@ -224,6 +226,7 @@ test-suite blueprint-test
     , parallel
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , stack
     , tasty
     , tasty-golden
     , tasty-hedgehog

@@ -39,6 +39,8 @@ dependencies:
 - monad-par
 - parallel
 - exceptions
+- stack
+
 
 default-extensions:
   - AllowAmbiguousTypes

@@ -93,7 +93,7 @@ you can even give a root directory if you don't know the location of your entity
 `blueprint type Name -t Main.hs` : definition of data type `Name` with type synonyms converted to their original type located in `Main.hs`. 
 
 ## Installing pre-compiled binaries 
-
+  * [ ] 
 ## Building from source
 
 ### Dependencies
@@ -126,7 +126,3 @@ takes the type we want to pretty-print as an argument.
 - `-i FILE` or `--image FILE` : Save the result in an image file.
 - `-p FILE` or `--pdf FILE` : Save the result in a pdf file.
 - `-s FILE` or `--source-code FILE` : save the result in a haskell file.
-
-
-## Disclaimer
-This program is designed to be used as a command-line utility and not as a library. For an integrated experience use the `call-hierarchy` plugin in [HLS](https://github.com/haskell/haskell-language-server).

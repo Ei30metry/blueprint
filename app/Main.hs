@@ -57,7 +57,7 @@ import           Options.Applicative    ( execParser, fullDesc, header, helper,
                                           info, progDesc )
 
 import           Result
-import           Result                 ( banner )
+import           Result                 ( banner, bluePrintASTtoTreeString )
 
 import           System.IO              ( stdout )
 
@@ -82,11 +82,6 @@ runner1 = runGhcT (Just libdir) $ do
   where
     toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
   -- liftIO . printSDocLn defaultSDocContext (PageMode True) stdout . ppr $ fResult2
-
-
-defPrint :: SDoc -> IO ()
-defPrint = printSDocLn defaultSDocContext (PageMode True) stdout
-
 
 runner2 :: IO ()
 runner2 = runGhcT (Just libdir) $ do
@@ -124,8 +119,12 @@ runner4 = runGhcT (Just libdir) $ do
     (res, _) <- runBluePrint (searchInDefUses @String result) (gblEnv, ent)
     let name = entityToName ent gblEnv
     -- liftIO . defPrint . ppr $ T.levels . coerce @_ @(T.Tree Name) <$> res --(T.Tree Name)) <$> res
-    liftIO . print . fmap nameTreeToStringTree $ res
-    liftIO . print . fmap (drawTree . nameTreeToStringTree) $ res
+    liftIO . print . fmap bluePrintASTtoTreeString $ res
+    liftIO . print . fmap (drawTree . bluePrintASTtoTreeString) $ res
+    -- case res of
+    --   Just x -> return . liftIO . print . fmap (drawTree . bluePrintASTtoTreeString) $ x
+    --   Nothing -> return ()
+
 
 
 printBindings :: FilePath -> IO ()

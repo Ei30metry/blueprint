@@ -1,6 +1,5 @@
 module CLI (parseSearchEnv) where
 
-
 import           Control.Applicative         ( (<|>) )
 
 import           Options.Applicative         ( Parser, argument, help, long,

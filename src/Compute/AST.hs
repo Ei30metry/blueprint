@@ -1,93 +1,34 @@
 module Compute.AST where
 
-import           App                               ( BluePrint (..), bluePrint )
-
-import           Compute.Morphisms                 ( getEntityOccString,
-                                                     occNameFromEntity )
+import           App                               ( BluePrint (..) )
 
 import           Control.Lens.Combinators          ( Field1 (_1), view )
-import           Control.Monad                     ( join, liftM, void, (<=<) )
-import           Control.Monad.IO.Class            ( liftIO )
+import           Control.Monad                     ( (<=<) )
 import           Control.Monad.Trans               ( MonadTrans (..) )
-import           Control.Monad.Trans.Reader        ( ReaderT, ask, asks, local,
-                                                     mapReaderT, reader,
-                                                     withReaderT )
-import           Control.Monad.Trans.Writer.Lazy   ( WriterT (..), execWriterT,
-                                                     mapWriterT )
+import           Control.Monad.Trans.Reader        ( ask )
 
-import           Data.Bifunctor                    ( first )
-import           Data.Coerce                       ( coerce )
 import           Data.Functor                      ( (<&>) )
-import           Data.Functor.Classes              ( eq1, Show1 )
-import qualified Data.IntMap.Lazy                  as IM
-import           Data.List                         ( find )
-import           Data.Maybe                        ( catMaybes, fromJust,
-                                                     fromMaybe, isJust )
-import           Data.Traversable
-import           Data.Tree                         ( Tree (..), flatten,
-                                                     foldTree, levels,
-                                                     subForest, unfoldForest,
-                                                     unfoldForestM,
-                                                     unfoldTreeM )
-import           Data.Tree.Lens                    ( branches, root )
+import           Data.Functor.Classes              ( Show1 )
+import           Data.Maybe                        ( fromMaybe )
+import           Data.Tree                         ( Tree (..))
 
-import           GHC                               ( AnnSortKey, Backend (..),
-                                                     DynFlags (backend),
-                                                     GhcMonad (getSession),
-                                                     GhcRn, GhcT (..),
-                                                     HsValBinds (..),
-                                                     HsValBindsLR (ValBinds, XValBindsLR),
-                                                     HscEnv (..),
-                                                     LoadHowMuch (..),
+import           GHC                               ( GhcMonad (getSession),
+                                                     GhcRn, HsValBinds (..),
                                                      ModSummary,
-                                                     NHsValBindsLR (NValBinds),
-                                                     NamedThing (..),
-                                                     ParsedModule (ParsedModule),
-                                                     Pass (..),
                                                      RenamedSource (..),
-                                                     SuccessFlag (..),
-                                                     Target (..),
                                                      TypecheckedModule (tm_internals_, tm_renamed_source),
-                                                     backend, getModSummary,
-                                                     getSession,
-                                                     getSessionDynFlags,
-                                                     guessTarget, hs_valds,
-                                                     load, mkModuleName,
-                                                     parseModule,
-                                                     setSessionDynFlags,
-                                                     setTargets, tm_internals_,
+                                                     backend, hs_valds,
+                                                     parseModule, tm_internals_,
                                                      tm_renamed_source,
-                                                     typecheckModule )
-import           GHC.Data.OrdList                  ( OrdList (..), fromOL,
-                                                     fromOLReverse, toOL )
+                                                     typecheckModule, ParsedModule (..))
 import           GHC.Hs.Utils                      ( CollectFlag (..),
-                                                     collectHsIdBinders,
-                                                     collectHsValBinders,
-                                                     spanHsLocaLBinds )
-import           GHC.Parser.Annotation             ()
-import           GHC.Plugins                       ( Defs, Outputable,
-                                                     lookupUniqSet,
-                                                     sizeUniqSet )
-import           GHC.Tc.Module
-import           GHC.Tc.Types                      ( TcGblEnv (..), TcRn (..) )
-import           GHC.Tc.Utils.Monad
-import           GHC.Types.Basic                   ( RecFlag )
-import           GHC.Types.Name                    ( Name (..) )
-import           GHC.Types.Name.Reader             ( GlobalRdrElt,
-                                                     GlobalRdrEnv )
-import           GHC.Types.Name.Set                ( DefUse, DefUses (..), Uses,
-                                                     allUses, duDefs, duUses,
-                                                     findUses )
+                                                     collectHsValBinders )
+import           GHC.Tc.Types                      ( TcGblEnv (..) )
+import           GHC.Types.Name.Reader             ( GlobalRdrEnv )
 import           GHC.Utils.Panic                   ( panic )
 
-import           Language.Haskell.Syntax.Binds     ( HsValBinds (..) )
-import           Language.Haskell.Syntax.Extension ( IdP, NoExtField (..),
-                                                     noExtField )
+import           Language.Haskell.Syntax.Extension ( IdP )
 
-import           Types                             ( Entity (..),
-                                                     OutputType (..),
-                                                     Scope (..), SearchEnv (..),
-                                                     SearchLevel (..) )
 
 
 parseSourceFile :: forall w m. (Monoid w, GhcMonad m) => BluePrint ModSummary w m ParsedModule

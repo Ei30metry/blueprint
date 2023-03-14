@@ -5,15 +5,16 @@ module Compute.Morphisms where
 
 import           App                        ( BluePrint (..) )
 
-import           Control.Monad              ( filterM, (<=<), join )
+import           Control.Monad              ( filterM, join, (<=<) )
 import           Control.Monad.Trans        ( lift )
 import           Control.Monad.Trans.Reader ( ask, asks )
 
 import           Data.Foldable              ( find )
 
+import           GHC                        ( ModuleName )
 import           GHC.Driver.Env             ( HscEnv (hsc_unit_env) )
 import           GHC.Driver.Monad           ( GhcMonad (getSession) )
-import           GHC.Types.Avail            ( AvailInfo (..), Avails (..) )
+import           GHC.Types.Avail            ( AvailInfo (..), Avails (..), GreName (NormalGreName) )
 import           GHC.Types.Name             ( Name, OccName, mkOccName, tcName,
                                               varName )
 import           GHC.Types.Name.Occurrence  ( lookupOccEnv )
@@ -31,12 +32,31 @@ import           GHC.Unit.Home              ( HomeUnit )
 import           Types                      ( Entity (..), EntityOccDef, Func,
                                               Scope (..), SearchEnv (..),
                                               TypeC (..) )
-import GHC (ModuleName)
+
+funcOccString :: Scope -> Func
+funcOccString (TopLevel func)   = func
+funcOccString (ParentS _ lFunc) = lFunc
+
+getEntityOccString :: Entity -> EntityOccDef
+getEntityOccString (DataTypeE t)   = typeName t
+getEntityOccString (FunctionE s _) = funcOccString s
+
+occNameFromEntity :: Entity -> OccName
+occNameFromEntity (DataTypeE t)   = mkOccName tcName $ typeName t
+occNameFromEntity (FunctionE s _) = mkOccName varName $ funcOccString s
 
 
 -- This function should only be used to search the entity gathered from command line
 entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Maybe GlobalRdrElt
 entityToGlbRdrElt ent env = find gre_lcl $ lookupGlobalRdrEnv env (occNameFromEntity ent)
+
+
+entityToName :: Entity -> GlobalRdrEnv -> Maybe Name
+entityToName ent = isNormalGreName <=< return . gre_name <=< entityToGlbRdrElt ent
+  where isNormalGreName = \case
+          NormalGreName name -> Just name
+          _ -> Nothing
+
 
 -- entityToName' :: forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint (ModuleName, GlobalRdrEnv) w m (Maybe GlobalRdrElt)
 -- entityToName' ent = BT $ do
@@ -49,16 +69,3 @@ entityToGlbRdrElt ent env = find gre_lcl $ lookupGlobalRdrEnv env (occNameFromEn
 --     isFromCurrentMod :: ModuleName -> GlobalRdrElt -> Bool
 --     -- fmap ((is_mod . is_decl) . gre_imp)
 --     isFromCurrentMod modName elt = undefined -- fmap (is_mod . is_decl) $ gre_imp elt == modName -- fmap ((is_mod . is_decl) . gre_imp) elt == modName
-
-occNameFromEntity :: Entity -> OccName
-occNameFromEntity (DataTypeE t)   = mkOccName tcName $ typeName t
-occNameFromEntity (FunctionE s _) = mkOccName varName $ funcOccString s
-
-
-funcOccString :: Scope -> Func
-funcOccString (TopLevel func)   = func
-funcOccString (ParentS _ lFunc) = lFunc
-
-getEntityOccString :: Entity -> EntityOccDef
-getEntityOccString (DataTypeE t)   = typeName t
-getEntityOccString (FunctionE s _) = funcOccString s

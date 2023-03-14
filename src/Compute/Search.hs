@@ -1,51 +1,103 @@
 module Compute.Search where
 
-import           App (BluePrint(..), runBluePrint)
+import           App                        ( BluePrint (..), runBluePrint )
 
-import           Compute.AST              ()
-import           Compute.Morphisms        ( occNameFromEntity )
+import           Compute.AST                ( BluePrintAST (..) )
+import           Compute.Morphisms          ( entityToName, occNameFromEntity )
 
-import           Control.Lens.Combinators ( makeLenses )
-import           Control.Lens.Getter      ()
-import           Control.Lens.Lens        ()
-import           Control.Lens.Operators   ()
-import           Control.Lens.Setter      ()
+import           Control.Lens.Combinators   ( Bifunctor (bimap), makeLenses )
+import           Control.Lens.Getter        ()
+import           Control.Lens.Lens          ()
+import           Control.Lens.Operators     ()
+import           Control.Lens.Setter        ()
+import           Control.Monad              ( filterM, join, (<=<) )
+import           Control.Monad.Trans        ( lift )
+import           Control.Monad.Trans.Reader ( ask )
 
-import qualified Data.Map                 as M
-import           Data.Tree                ()
-import           Data.Tree.Lens           ()
+import           Data.Bifunctor             ( Bifunctor (first) )
+import           Data.Coerce                ( coerce )
+import           Data.Foldable              ( Foldable (toList), find )
+import           Data.Functor.Classes       ( eq1 )
+import qualified Data.IntMap.Lazy           as IM
+import           Data.Maybe                 ( fromJust, fromMaybe )
+import           Data.Traversable           ( traverse )
+import           Data.Tree                  ( Forest, Tree (..), levels,
+                                              unfoldTree, unfoldTreeM )
+import           Data.Tree.Lens             ()
 
-import           GHC                      ( HsBindLR (..), HsValBinds, Pass,
-                                            RenamedSource )
-import           GHC.Types.Avail          ()
-import           GHC.Types.Name           ( Name (..) )
-import           GHC.Types.Name.Reader    ( GlobalRdrElt, GlobalRdrEnv,
-                                            lookupGlobalRdrEnv )
-import           GHC.Types.Name.Set       ( DefUse, DefUses, Defs, NameSet,
-                                            Uses )
-import           GHC.Types.Unique         ( Uniquable (..) )
+import           GHC                        ( GhcMonad (..), HsBindLR (..),
+                                              HsGroup, HsValBinds, Module,
+                                              ModuleName, Pass, RenamedSource,
+                                              isExternalName, moduleName,
+                                              moduleUnit, nameModule )
+import           GHC.Data.OrdList           ( fromOL )
+import           GHC.Plugins                ( FastString (FastString),
+                                              isInternalName, isWiredInName,
+                                              lookupUniqSet, nameModule,
+                                              nonDetEltsUniqSet,
+                                              nonDetKeysUniqSet, sizeUniqSet,
+                                              unpackFS )
+import           GHC.Types.Avail            ()
+import           GHC.Types.Name             ( Name (..) )
+import           GHC.Types.Name.Reader      ( GlobalRdrElt, GlobalRdrEnv,
+                                              lookupGlobalRdrEnv )
+import           GHC.Types.Name.Set         ( DefUse, DefUses, Defs, NameSet,
+                                              Uses )
+import           GHC.Types.Unique           ( Uniquable (..) )
+import           GHC.Types.Unique.Set       ( UniqSet )
+import           GHC.Unit                   ( homeUnitAsUnit )
 
-import           Types                    ( SearchEnv (..) , Entity(..))
+import           Types                      ( Entity (..), SearchEnv (..) )
 
 
-data ASTEnv a = AEnv { _elemName     :: GlobalRdrElt
-                     , _globalRdrEnv :: GlobalRdrEnv
-                     , _renamedBinds :: HsValBinds a }
+data CompEnv a = CompEnv { _elemName     :: GlobalRdrElt
+                         , _globalRdrEnv :: GlobalRdrEnv
+                         , _renamedBinds :: HsGroup a }
 
--- NOTE for finding the actual Name
--- NameSpace == Varname && NameSort == External ....
--- lookupName :: GlobalRdrEnv -> String -> [Name]
-
-
-makeLenses ''ASTEnv
-
-recurseImplementation :: Monad m => (GlobalRdrEnv, RenamedSource) -> m [a]
-recurseImplementation = undefined
+makeLenses ''CompEnv
 
 
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]
 searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)
 
+-- Unsafe Type Synonym for telling the user that the NameSet should have 1 and only 1 element in it
+type Def = Defs
 
-searchInDefUses :: forall w m. DefUses -> BluePrint Entity w m DefUse
-searchInDefUses = undefined
+
+-- -- testBuild :: Name -> DefUses ->  [(Name, [Name])]
+-- -- testBuild :: Name -> DefUses -> [(Name, Module)]
+-- testBuild :: Name -> DefUses -> [[(Name, Module)]]
+testBuild _ defUses = map (map (\x -> (x, moduleUnit $ nameModule x)) . snd) names
+  where final = mapM helper definitions
+        helper (Nothing, _) = Nothing
+        helper (Just x, y)  = Just (x, y)
+        toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
+        definitions = toBinds $ fromOL defUses
+        names = bimap (head . nonDetEltsUniqSet) nonDetEltsUniqSet <$> fromJust final
+        -- withNameSortInfo list = map snd list
+
+
+buildUsageTree :: Name -> [(Def, Uses)] -> Maybe (BluePrintAST Name)
+buildUsageTree name [] = Just (pure name)
+buildUsageTree name uses = coerce $ go name defUses
+  where defUses = bimap (head . nonDetEltsUniqSet) nonDetEltsUniqSet <$> uses
+        go :: Name -> [(Name, [Name])] -> Maybe (Tree Name)
+        go root [] = Just (pure root)
+        go root defs = join (case find ((== root) . fst) defs of
+           Nothing    -> return $ Just (pure root)
+           Just (d,u) -> return $ Node d <$> traverse (`go` defs) u)
+
+
+-- TODO fix the function to use GlobalRdrEnv
+searchInDefUses :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint (GlobalRdrEnv, Entity) w m (Maybe (BluePrintAST Name))
+searchInDefUses defUses = BT $ do
+    let definitions = toBinds $ fromOL defUses
+    (gblEnv, toSearchFor) <- ask
+    let name = entityToName toSearchFor gblEnv
+    case name of
+      Nothing -> return Nothing
+      Just n -> return (buildUsageTree n =<< mapM helper definitions)
+  where
+    toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
+    helper (Nothing, _) = Nothing
+    helper (Just x, y)  = Just (x, y)

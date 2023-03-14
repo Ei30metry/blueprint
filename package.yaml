@@ -43,6 +43,7 @@ dependencies:
 default-extensions:
   - AllowAmbiguousTypes
   - PatternSynonyms
+  - TupleSections
   - MultiParamTypeClasses
   - GADTs
   - ScopedTypeVariables
@@ -57,6 +58,7 @@ default-extensions:
   - DeriveGeneric
   - KindSignatures
   - StandaloneKindSignatures
+  - StandaloneDeriving
   - RoleAnnotations
   - TemplateHaskell
   - EmptyCase
@@ -64,6 +66,7 @@ default-extensions:
   - DeriveFunctor
   - LambdaCase
   - FlexibleContexts
+  - DerivingStrategies
 
 ghc-options:
 - -Wall

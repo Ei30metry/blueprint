@@ -1,14 +1,12 @@
 module Compute.AST where
 
 import           App                               ( BluePrint (..), bluePrint )
-import Data.List (find)
-import qualified Data.IntMap.Lazy as IM
-import Data.Functor.Classes ( eq1 )
-import Data.Functor ((<&>))
+
+import           Compute.Morphisms                 ( getEntityOccString,
+                                                     occNameFromEntity )
 
 import           Control.Lens.Combinators          ( Field1 (_1), view )
-import Data.Bifunctor (first)
-import           Control.Monad                     ( liftM, void, (<=<), join )
+import           Control.Monad                     ( join, liftM, void, (<=<) )
 import           Control.Monad.IO.Class            ( liftIO )
 import           Control.Monad.Trans               ( MonadTrans (..) )
 import           Control.Monad.Trans.Reader        ( ReaderT, ask, asks, local,
@@ -17,8 +15,14 @@ import           Control.Monad.Trans.Reader        ( ReaderT, ask, asks, local,
 import           Control.Monad.Trans.Writer.Lazy   ( WriterT (..), execWriterT,
                                                      mapWriterT )
 
+import           Data.Bifunctor                    ( first )
 import           Data.Coerce                       ( coerce )
-import           Data.Maybe                        ( fromMaybe, catMaybes, fromJust, isJust )
+import           Data.Functor                      ( (<&>) )
+import           Data.Functor.Classes              ( eq1, Show1 )
+import qualified Data.IntMap.Lazy                  as IM
+import           Data.List                         ( find )
+import           Data.Maybe                        ( catMaybes, fromJust,
+                                                     fromMaybe, isJust )
 import           Data.Traversable
 import           Data.Tree                         ( Tree (..), flatten,
                                                      foldTree, levels,
@@ -61,7 +65,9 @@ import           GHC.Hs.Utils                      ( CollectFlag (..),
                                                      collectHsValBinders,
                                                      spanHsLocaLBinds )
 import           GHC.Parser.Annotation             ()
-import           GHC.Plugins                       ( Outputable, Defs, lookupUniqSet, sizeUniqSet )
+import           GHC.Plugins                       ( Defs, Outputable,
+                                                     lookupUniqSet,
+                                                     sizeUniqSet )
 import           GHC.Tc.Module
 import           GHC.Tc.Types                      ( TcGblEnv (..), TcRn (..) )
 import           GHC.Tc.Utils.Monad
@@ -82,7 +88,7 @@ import           Types                             ( Entity (..),
                                                      OutputType (..),
                                                      Scope (..), SearchEnv (..),
                                                      SearchLevel (..) )
-import Compute.Morphisms (getEntityOccString, occNameFromEntity )
+
 
 parseSourceFile :: forall w m. (Monoid w, GhcMonad m) => BluePrint ModSummary w m ParsedModule
 parseSourceFile = BT $ ask >>= \modSum -> lift . lift $ parseModule modSum
@@ -130,25 +136,7 @@ valBindsToHsBinds :: HsValBinds GhcRn -> [IdP GhcRn]
 valBindsToHsBinds = collectHsValBinders CollNoDictBinders
 
 
+
 -- TODO learn how deriving mechanism like deriving via and standalone deriving work
-newtype BluePrintAST = BAST {unBAST :: Tree (Maybe Defs, Uses)}
-
-
--- usageTree :: DefUses -> BluePrintAST DefUse
--- usageTree :: DefUses -> BluePrintAST
--- usageTree = go . map (first (\(Just x) -> x)) . fromOL
---   where
---     go = undefined
-
--- TODO Entity -> Maybe GlobalRdrElt -> Maybe Name -> lookup in DefUses
--- TODO find a way to test in repl without having to complete all the fucking thing.
--- searchInDefs :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint Entity w m Int -- [Maybe DefUse]
--- searchInDefs defUses = BT $ do
---     let definitions = toBinds $ fromOL defUses
---     toSearchFor <- ask
---     -- let res = searchFor toSearchFor definitions
---     return 2
---   where
---     toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
---     searchFor ent = mapM (fmap (`lookupUniqSet` entityToName ent) . fst)
-    -- searchFor ent defs = length $ fmap (fmap (  ))
+newtype BluePrintAST a = BAST { unBAST :: Tree a }
+  deriving (Applicative, Monad, Functor, Show, Eq, Ord, Show1)

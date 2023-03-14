@@ -97,6 +97,9 @@ seeFromTcGblEnv fieldSelector = BT $ do
   lift . lift $ return . fieldSelector . tcModuleToTcGblEnv <=< typecheckModule $ parsed
 
 
+seeDefUses :: forall w m. (GhcMonad m, Monoid w) => BluePrint ModSummary w m DefUses
+seeDefUses = seeFromTcGblEnv tcg_dus
+
 -- rnTest ent = do
 --   parsed <- parseSourceFile
 --   (glb,_) <- lift $ rnWithGlobalEnv' parsed

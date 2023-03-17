@@ -7,20 +7,23 @@ import           Control.Monad                     ( (<=<) )
 import           Control.Monad.Trans               ( MonadTrans (..) )
 import           Control.Monad.Trans.Reader        ( ask )
 
+import           Data.Aeson                        ( ToJSON(..) )
 import           Data.Functor                      ( (<&>) )
 import           Data.Functor.Classes              ( Show1 )
 import           Data.Maybe                        ( fromMaybe )
-import           Data.Tree                         ( Tree (..))
+import           Data.Tree                         ( Tree (..) )
 
 import           GHC                               ( GhcMonad (getSession),
                                                      GhcRn, HsValBinds (..),
                                                      ModSummary,
+                                                     ParsedModule (..),
                                                      RenamedSource (..),
                                                      TypecheckedModule (tm_internals_, tm_renamed_source),
                                                      backend, hs_valds,
                                                      parseModule, tm_internals_,
                                                      tm_renamed_source,
-                                                     typecheckModule, ParsedModule (..))
+                                                     typecheckModule )
+import           GHC.Generics                      ( Generic )
 import           GHC.Hs.Utils                      ( CollectFlag (..),
                                                      collectHsValBinders )
 import           GHC.Tc.Types                      ( TcGblEnv (..) )
@@ -28,6 +31,7 @@ import           GHC.Types.Name.Reader             ( GlobalRdrEnv )
 import           GHC.Utils.Panic                   ( panic )
 
 import           Language.Haskell.Syntax.Extension ( IdP )
+import GHC.Utils.Json (ToJson)
 
 
 
@@ -42,7 +46,6 @@ typeCheckedToGlbEnv :: TypecheckedModule -> GlobalRdrEnv
 typeCheckedToGlbEnv = tcg_rdr_env . tcModuleToTcGblEnv
 
 
--- TODO find out in what circumstatnces we have a Nothing value instead of renamed source
 typeCheckedToRenamed :: TypecheckedModule -> RenamedSource
 typeCheckedToRenamed = fromMaybe fix . tm_renamed_source
   where fix = panic explanation
@@ -77,7 +80,9 @@ valBindsToHsBinds :: HsValBinds GhcRn -> [IdP GhcRn]
 valBindsToHsBinds = collectHsValBinders CollNoDictBinders
 
 
-
 -- TODO learn how deriving mechanism like deriving via and standalone deriving work
 newtype BluePrintAST a = BAST { unBAST :: Tree a }
-  deriving (Applicative, Monad, Functor, Show, Eq, Ord, Show1)
+  deriving (Applicative, Monad, Functor, Show, Eq, Ord, Show1, Generic)
+
+instance ToJSON a => ToJSON (BluePrintAST a) where
+  toEncoding x = undefined

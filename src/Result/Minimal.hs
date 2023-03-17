@@ -1,0 +1,3 @@
+-- | 
+
+module Result.Minimal where

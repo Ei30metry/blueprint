@@ -20,27 +20,31 @@ dependencies:
 - base >= 4.7 && < 5
 - text
 - bytestring
-- colour
-- fmt
 - containers
 - mtl
 - transformers
-- extra
-- cereal
 - optparse-applicative
-- vector
 - lens
 - ghc-lib
-- ghc-prim
 - ghc-paths
-- fgl
-- prettyprinter
-- prettyprinter-ansi-terminal
-- monad-par
-- parallel
-- exceptions
-- stack
-
+- text-show
+- lucid2
+- clay
+- aeson
+- aeson-pretty
+- lens-aeson
+# - exceptions
+# - ghc-prim
+# - colour
+# - fmt
+# - extra
+# - cereal
+# - vector
+# - prettyprinter
+# - prettyprinter-ansi-terminal
+# - monad-par
+# - parallel
+# - stack
 
 default-extensions:
   - AllowAmbiguousTypes

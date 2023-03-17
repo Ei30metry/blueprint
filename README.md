@@ -23,67 +23,85 @@ There are 2 commands in Blueprint:
 Assume we want to see the "blueprint" of our `parseMoodReports` function defined below. (with path "HERE") 
 
 ```haskell 
-module Parser.Input(Header (..),
-                   parseEntry
-                   ) where
+module Golden5 where
 
-import           Data.List                     ( sortOn )
-import           Data.Singletons.Base.TH       ( singletons )
+import qualified Data.Text as T
+import qualified Golden2 as G
+import qualified Golden2 as GG
+import qualified Golden6 as L
 
-import           Text.Parsec                   ( alphaNum )
-import           Text.Parsec.Char              ( newline )
-import           Text.ParserCombinators.Parsec ( GenParser, alphaNum, char,
-                                                 choice, digit, many, many1,
-                                                 sepBy, spaces, string, try,
-                                                 (<|>) )
+f :: Int -> String
+f = g
+  where g = show . (+2)
 
 
-data Header a where
-  NameH :: a -> Header a
-  DateH :: (a,a,a) -> Header a
-  MoodReportH :: [(a,a)] -> Header a 
-  SleepH :: (a,a) -> Header a 
-  ProductivityH :: (a,a) -> Header a
-  MeditationH :: [a] -> Header a
-  AlcoholH :: (a,a) -> Header a
-  CigaretteH :: (a,a,a) -> Header a
-  RatingH :: a -> Header a
-  AllHeaders :: [Header a] -> Header a
+g :: String -> Int
+g = read
 
 
-parseMood :: GenParser Char st String
-parseMood = choice $ map string ["Neutral", "Angry", "Sad"
-                                 ,"Excited", "Happy", "Focused", "Bored"]
+pack :: String
+pack = undefined
 
 
--- parses one mood
-parseMoodReport :: GenParser Char st (String, String)
-parseMoodReport = do
-  userMood <- parseMood
-  spaces
-  char ':'
-  spaces
-  moodIntensity <- parseIntensity
-  many newline
-  return (userMood, moodIntensity)
+pack' :: String -> T.Text
+pack' = T.pack
+
+pack'' :: String
+pack'' = G.pack
+
+g' :: String -> Int
+g' = g
+
+g'' :: String -> Int
+g'' = g'
+
+f' :: Int -> Int
+f' = g . f
 
 
-parseMoodReports :: forall a st. (a ~ String) => GenParser Char st (Header a)
-parseMoodReports = do
-  mood
-  many newline
-  l <- many1 parseMoodReport <* many newline
-  return $ MoodReportH $ sortOn fst l
+l :: Int -> Int
+l = g . f
+
+test12 :: Int -> String
+test12 = show . (+1) . id . f'
+
+
+f'' :: Int -> String
+f'' = f . f1
+  where f1 = f'
+
+
+test1 :: Int -> String
+test1 = show . (+1) . id . f'
+
+test1' :: String -> Int
+test1' = (+2) . read . test1 . read
+
+map' :: (a -> b) -> [a] -> [b]
+map' = map
+
+
+fPrime :: (Int -> String) -> (String -> Int) -> (Int -> Int)
+fPrime f'' g = g . f''
+
+
+fPrimeWithApplication :: (Int -> Int) -> Int
+fPrimeWithApplication t = t 4
+
 ```
 
-Running `blueprint function parseMoodReports -c "HERE"` would result in:
+Running `blueprint function "f'" Golden2.hs` would result in (this is the default minimal output):
 
 ``` text
-parseMoodReports := mood, many, newline, many1, parseMoodReport, (<*), (>>), (>>=), return, sortOn, fst
-... 
-... 
-... 
-.....
+(0) f' :=   (1) g'
+            (2) f
+
+(1) g' :=   (3) g
+
+(2) f  :=   show 
+            +
+
+(3) g  :=   read
 ```
 
 you can even give a root directory if you don't know the location of your entity.

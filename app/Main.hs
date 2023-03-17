@@ -3,65 +3,45 @@ module Main where
 import           App                    ( runBluePrint )
 
 import           Blueprint              ( initializeGhc, parseSourceFile',
-                                          prototypeFunc, rnTest,
-                                          seeFromTcGblEnv )
+                                          prototypeFunc, seeFromTcGblEnv )
 
 import           CLI                    ( parseSearchEnv )
 
-import           Compute                ( BluePrintAST (..), entityToGlbRdrElt,
-                                          entityToName, parseSourceFile,
+import           Compute                ( entityToGlbRdrElt, entityToName,
                                           rnWithGlobalEnv', searchInDefUses )
 
 import           Control.Applicative    ( (<**>) )
-import           Control.Exception      ( asyncExceptionFromException )
-import           Control.Monad          ( guard, replicateM_, (<=<) )
+import           Control.Monad          ( (<=<) )
 import           Control.Monad.IO.Class ( liftIO )
 
-import           Data.Bifunctor         ( first )
-import           Data.Coerce            ( coerce )
+import qualified Data.ByteString        as B
 import           Data.Functor.Classes   ( eq1 )
-import           Data.IORef
-import           Data.Maybe             ( fromJust )
+import           Data.IORef             ( readIORef )
+import           Data.Text              ( pack )
 import           Data.Tree              ( drawTree )
-import qualified Data.Tree              as T
 
 import           GHC                    ( GhcMonad (getSession),
-                                          LoadHowMuch (LoadAllTargets), Located,
-                                          ModSummary (ms_mod, ms_textual_imps),
-                                          ModuleName, Name,
-                                          ParsedModule (pm_parsed_source),
-                                          getModuleGraph, getModuleInfo,
-                                          mgModSummaries, moduleUnit,
-                                          parseModule, runGhcT, unLoc )
-import           GHC.Data.FastString    ( FastString )
+                                          LoadHowMuch (LoadAllTargets),
+                                          getModuleGraph, mgModSummaries,
+                                          moduleUnit, parseModule, runGhcT )
 import           GHC.Data.OrdList       ( fromOL )
-import           GHC.Driver.Env         ( HscEnv (hsc_mod_graph, hsc_unit_env) )
 import           GHC.Paths              ( libdir )
 import           GHC.Plugins            ( sizeUniqSet )
 import           GHC.Tc.Types           ( TcGblEnv (..) )
-import           GHC.Tc.Utils.Monad     ( readTcRef )
 import           GHC.Types.Name.Reader  ( GlobalRdrElt (gre_imp, gre_lcl),
                                           ImpDeclSpec (is_mod),
                                           ImportSpec (is_decl, is_item),
-                                          importSpecLoc, importSpecModule,
                                           pprGlobalRdrEnv )
-import           GHC.Unit.Env           ( ue_home_unit )
-import           GHC.Unit.Home          ( homeUnitId )
-import           GHC.Utils.Outputable   ( SDoc (..), defaultDumpStyle,
-                                          defaultSDocContext, defaultUserStyle,
-                                          ppr, printSDoc, printSDocLn,
-                                          showPprUnsafe )
-import           GHC.Utils.Ppr          ( Mode (PageMode), style )
+import           GHC.Utils.Outputable   ( ppr, showPprUnsafe )
 
 import           Options.Applicative    ( execParser, fullDesc, header, helper,
                                           info, progDesc )
 
-import           Result
-import           Result                 ( banner, bluePrintASTtoTreeString )
-
-import           System.IO              ( stdout )
+import           Result                 ( bluePrintASTtoTreeString', defPrint,
+                                          prettyPrintJSON )
 
 import           Types                  ( SearchEnv (..) )
+import qualified Data.ByteString.Lazy.Char8 as B
 
 
 main :: IO ()
@@ -90,7 +70,6 @@ runner2 = runGhcT (Just libdir) $ do
   gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
   liftIO . defPrint $ pprGlobalRdrEnv True gblEnv
 
--- testFunc :: ModSummary ->
 
 runner3 :: IO ()
 runner3 = runGhcT (Just libdir) $ do
@@ -105,7 +84,7 @@ runner3 = runGhcT (Just libdir) $ do
     modSummaries <- mgModSummaries <$> getModuleGraph
     hsc <- getSession
     liftIO . defPrint $ ppr glbRdrElt
-    -- liftIO . defPrint $ pprGlobalRdrEnv True gblEnv
+
 
 runner4 :: IO ()
 runner4 = runGhcT (Just libdir) $ do
@@ -118,13 +97,7 @@ runner4 = runGhcT (Just libdir) $ do
     (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
     (res, _) <- runBluePrint (searchInDefUses @String result) (gblEnv, ent)
     let name = entityToName ent gblEnv
-    -- liftIO . defPrint . ppr $ T.levels . coerce @_ @(T.Tree Name) <$> res --(T.Tree Name)) <$> res
-    liftIO . print . fmap bluePrintASTtoTreeString $ res
-    liftIO . print . fmap (drawTree . bluePrintASTtoTreeString) $ res
-    -- case res of
-    --   Just x -> return . liftIO . print . fmap (drawTree . bluePrintASTtoTreeString) $ x
-    --   Nothing -> return ()
-
+    mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
 
 
 printBindings :: FilePath -> IO ()

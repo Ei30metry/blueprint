@@ -1,9 +1,12 @@
 module Golden5 where
 
 import qualified Data.Text as T
-import qualified Golden2 as G
-import qualified Golden2 as GG
-import qualified Golden6 as L
+
+import qualified Golden2   as G
+import qualified Golden2   as GG
+
+import qualified Golden6   as L
+
 
 f :: Int -> String
 f = g
@@ -13,10 +16,8 @@ f = g
 g :: String -> Int
 g = read
 
-
 pack :: String
 pack = undefined
-
 
 pack' :: String -> T.Text
 pack' = T.pack
@@ -33,13 +34,13 @@ g'' = g'
 f' :: Int -> Int
 f' = g . f
 
-
 l :: Int -> Int
 l = g . f
 
 test12 :: Int -> String
 test12 = show . (+1) . id . f'
 
+test12' = show . (+1) . id . read . show . (+2)
 
 f'' :: Int -> String
 f'' = f . f1

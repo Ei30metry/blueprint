@@ -1,6 +1,6 @@
 module Compute.Search where
 
-import           App                        ( BluePrint (..), runBluePrint )
+import           App                        ( BluePrint (..) )
 
 import           Compute.AST                ( BluePrintAST (..) )
 import           Compute.Morphisms          ( entityToName, occNameFromEntity )
@@ -10,42 +10,26 @@ import           Control.Lens.Getter        ()
 import           Control.Lens.Lens          ()
 import           Control.Lens.Operators     ()
 import           Control.Lens.Setter        ()
-import           Control.Monad              ( filterM, join, (<=<) )
-import           Control.Monad.Trans        ( lift )
+import           Control.Monad              ( join )
 import           Control.Monad.Trans.Reader ( ask )
 
-import           Data.Bifunctor             ( Bifunctor (first) )
 import           Data.Coerce                ( coerce )
-import           Data.Foldable              ( Foldable (toList), find )
+import           Data.Foldable              ( find )
 import           Data.Functor.Classes       ( eq1 )
-import qualified Data.IntMap.Lazy           as IM
-import           Data.Maybe                 ( fromJust, fromMaybe )
-import           Data.Traversable           ( traverse )
-import           Data.Tree                  ( Forest, Tree (..), levels,
-                                              unfoldTree, unfoldTreeM )
+import           Data.Tree                  ( Tree (..) )
 import           Data.Tree.Lens             ()
 
-import           GHC                        ( GhcMonad (..), HsBindLR (..),
-                                              HsGroup, HsValBinds, Module,
-                                              ModuleName, Pass, RenamedSource,
-                                              isExternalName, moduleName,
-                                              moduleUnit, nameModule )
+import           GHC                        ( GhcMonad (..),
+                                              HsGroup, moduleName,
+                                              moduleUnit )
 import           GHC.Data.OrdList           ( fromOL )
-import           GHC.Plugins                ( FastString (FastString),
-                                              isInternalName, isWiredInName,
-                                              lookupUniqSet, nameModule,
-                                              nonDetEltsUniqSet,
-                                              nonDetKeysUniqSet, sizeUniqSet,
-                                              unpackFS )
+import           GHC.Plugins                ( nonDetEltsUniqSet, sizeUniqSet )
 import           GHC.Types.Avail            ()
 import           GHC.Types.Name             ( Name (..) )
 import           GHC.Types.Name.Reader      ( GlobalRdrElt, GlobalRdrEnv,
                                               lookupGlobalRdrEnv )
-import           GHC.Types.Name.Set         ( DefUse, DefUses, Defs, NameSet,
+import           GHC.Types.Name.Set         ( DefUses, Defs,
                                               Uses )
-import           GHC.Types.Unique           ( Uniquable (..) )
-import           GHC.Types.Unique.Set       ( UniqSet )
-import           GHC.Unit                   ( homeUnitAsUnit )
 
 import           Types                      ( Entity (..), SearchEnv (..) )
 
@@ -73,6 +57,11 @@ buildUsageTree name uses = coerce $ go name defUses
            Nothing    -> return $ Just (pure root)
            Just (d,u) -> return $ Node d <$> traverse (`go` defs) u)
 
+
+buildTypeUsageAST = undefined
+buildFunctionUsageAST = undefined
+
+buildUsageAST = undefined
 
 -- TODO fix the function to use GlobalRdrEnv
 searchInDefUses :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint (GlobalRdrEnv, Entity) w m (Maybe (BluePrintAST Name))

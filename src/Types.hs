@@ -1,42 +1,48 @@
 module Types( Entity(..), SearchEnv(..)
-            , Scope(..), SearchLevel(..)
+            , Scope(..), DepthLevel(..)
             , TypeC(..), EntityOccDef
             , ParentFunc, Func
             , LocalFunc, OutputType(..)
-            , Print(..)) where
+            , Print(..), VisualView(..)) where
 
+import           Data.Text ( Text )
 
 data Entity = FunctionE Scope Bool
             | DataTypeE TypeC
             deriving (Show, Eq)
 
-data TypeC = TypeC { typeName       :: String
+data TypeC = TypeC { typeName       :: Text
                    , reduceSynonyms :: Bool   } deriving (Show, Eq)
 
-type LocalFunc     = String
-type ParentFunc    = String
-type Func          = String
-type EntityOccDef  = String
+type LocalFunc     = Text
+type ParentFunc    = Text
+type Func          = Text
+type EntityOccDef  = Text
 
 
 data Scope = TopLevel Func
            | ParentS ParentFunc LocalFunc deriving (Eq, Show)
 
 
-data SearchLevel = Level Int | ToBottom deriving (Show, Eq)
+data DepthLevel = Level Int | ToBottom deriving (Show, Eq)
 
 
 data Print = STDIO
            | File FilePath
            deriving (Show, Eq)
 
-data OutputType = Image FilePath
-                | PDF FilePath
-                | SourceCode Print
+data VisualView = Browser
+                | DumpFile FilePath deriving (Show, Eq)
+
+data OutputType = Image VisualView -- SVG view
+                | HTML VisualView  -- HTML View
+                | SourceCode Print -- Haskell source code
+                | Minimal Print    -- like UNIX tree command
+                | JSONOutput Print -- JSON Output
                 deriving (Show, Eq)
 
 data SearchEnv = SEnv { entity     :: Entity      -- The thing we are searching for
-                      , levels     :: SearchLevel -- The levels to go down in AST
+                      , levels     :: DepthLevel  -- The levels to go down in AST
                       , withColor  :: Bool        -- Syntax highlighting
                       , lineNumber :: Bool        -- Show line numbers when printing outputs
                       , outputType :: OutputType  -- The type of result we expect

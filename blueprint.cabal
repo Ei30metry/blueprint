@@ -36,8 +36,10 @@ library
       Compute.Search
       Error
       Result
+      Result.HTML
       Result.Image
-      Result.Pdf
+      Result.JSON
+      Result.Minimal
       Result.Source
       Types
       Types.AST
@@ -75,29 +77,22 @@ library
       DerivingStrategies
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , aeson-pretty
+    , base >=4.7 && <5
     , bytestring
-    , cereal
-    , colour
+    , clay
     , containers
-    , exceptions
-    , extra
-    , fgl
-    , fmt
     , ghc-lib
     , ghc-paths
-    , ghc-prim
     , lens
-    , monad-par
+    , lens-aeson
+    , lucid2
     , mtl
     , optparse-applicative
-    , parallel
-    , prettyprinter
-    , prettyprinter-ansi-terminal
-    , stack
     , text
+    , text-show
     , transformers
-    , vector
   default-language: Haskell2010
 
 executable blueprint-exe
@@ -135,30 +130,23 @@ executable blueprint-exe
       DerivingStrategies
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , aeson-pretty
+    , base >=4.7 && <5
     , blueprint
     , bytestring
-    , cereal
-    , colour
+    , clay
     , containers
-    , exceptions
-    , extra
-    , fgl
-    , fmt
     , ghc-lib
     , ghc-paths
-    , ghc-prim
     , lens
-    , monad-par
+    , lens-aeson
+    , lucid2
     , mtl
     , optparse-applicative
-    , parallel
-    , prettyprinter
-    , prettyprinter-ansi-terminal
-    , stack
     , text
+    , text-show
     , transformers
-    , vector
   default-language: Haskell2010
 
 test-suite blueprint-test
@@ -205,32 +193,25 @@ test-suite blueprint-test
       DerivingStrategies
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , aeson-pretty
+    , base >=4.7 && <5
     , blueprint
     , bytestring
-    , cereal
-    , colour
+    , clay
     , containers
-    , exceptions
-    , extra
-    , fgl
-    , fmt
     , ghc-lib
     , ghc-paths
-    , ghc-prim
     , hedgehog
     , lens
-    , monad-par
+    , lens-aeson
+    , lucid2
     , mtl
     , optparse-applicative
-    , parallel
-    , prettyprinter
-    , prettyprinter-ansi-terminal
-    , stack
     , tasty
     , tasty-golden
     , tasty-hedgehog
     , text
+    , text-show
     , transformers
-    , vector
   default-language: Haskell2010

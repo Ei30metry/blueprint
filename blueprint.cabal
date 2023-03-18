@@ -86,12 +86,12 @@ library
     , ghc-lib
     , ghc-paths
     , lens
-    , lens-aeson
     , lucid2
     , mtl
+    , open-browser
     , optparse-applicative
+    , random
     , text
-    , text-show
     , transformers
   default-language: Haskell2010
 
@@ -140,12 +140,12 @@ executable blueprint-exe
     , ghc-lib
     , ghc-paths
     , lens
-    , lens-aeson
     , lucid2
     , mtl
+    , open-browser
     , optparse-applicative
+    , random
     , text
-    , text-show
     , transformers
   default-language: Haskell2010
 
@@ -204,14 +204,14 @@ test-suite blueprint-test
     , ghc-paths
     , hedgehog
     , lens
-    , lens-aeson
     , lucid2
     , mtl
+    , open-browser
     , optparse-applicative
+    , random
     , tasty
     , tasty-golden
     , tasty-hedgehog
     , text
-    , text-show
     , transformers
   default-language: Haskell2010

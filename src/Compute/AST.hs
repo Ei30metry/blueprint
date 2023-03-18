@@ -7,9 +7,8 @@ import           Control.Monad                     ( (<=<) )
 import           Control.Monad.Trans               ( MonadTrans (..) )
 import           Control.Monad.Trans.Reader        ( ask )
 
-import           Data.Aeson                        ( ToJSON(..) )
+import           Data.Aeson                        ( ToJSON (..), object, (.=) )
 import           Data.Functor                      ( (<&>) )
-import           Data.Functor.Classes              ( Show1 )
 import           Data.Maybe                        ( fromMaybe )
 import           Data.Tree                         ( Tree (..) )
 
@@ -31,7 +30,9 @@ import           GHC.Types.Name.Reader             ( GlobalRdrEnv )
 import           GHC.Utils.Panic                   ( panic )
 
 import           Language.Haskell.Syntax.Extension ( IdP )
-import GHC.Utils.Json (ToJson)
+
+
+import           Types.AST                         ( DataConCantHappen )
 
 
 
@@ -70,7 +71,6 @@ rnSrcToBindsBP :: forall m w. (GhcMonad m, Monoid w) => BluePrint RenamedSource 
 rnSrcToBindsBP = BT $ ask <&> hs_valds . view _1
 
 -- not exported by ghc-lib, so we define it locally
-data DataConCantHappen
 
 dataConCantHappen :: DataConCantHappen -> a
 dataConCantHappen x = case x of {}
@@ -78,11 +78,3 @@ dataConCantHappen x = case x of {}
 -- IdP GhcRn ~ Name
 valBindsToHsBinds :: HsValBinds GhcRn -> [IdP GhcRn]
 valBindsToHsBinds = collectHsValBinders CollNoDictBinders
-
-
--- TODO learn how deriving mechanism like deriving via and standalone deriving work
-newtype BluePrintAST a = BAST { unBAST :: Tree a }
-  deriving (Applicative, Monad, Functor, Show, Eq, Ord, Show1, Generic)
-
-instance ToJSON a => ToJSON (BluePrintAST a) where
-  toEncoding x = undefined

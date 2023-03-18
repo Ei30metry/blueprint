@@ -1,6 +1,6 @@
 module Result.JSON where
 
-import           Compute.AST                   ( BluePrintAST (..) )
+import           Types.AST                   ( BluePrintAST (..) )
 
 import           Data.Aeson                    ( ToJSON (..), Value )
 import           Data.Aeson.Encode.Pretty      ( Config (confIndent),

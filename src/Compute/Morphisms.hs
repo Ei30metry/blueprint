@@ -7,7 +7,7 @@ module Compute.Morphisms where
 import           Control.Monad         ( (<=<) )
 
 import           Data.Foldable         ( find )
-import           Data.Text             ( unpack, Text )
+import           Data.Text             ( Text, unpack )
 
 import           GHC.Types.Avail       ( GreName (NormalGreName) )
 import           GHC.Types.Name        ( Name, OccName, mkOccName, tcName,
@@ -17,7 +17,7 @@ import           GHC.Types.Name.Reader ( GlobalRdrElt (..), GlobalRdrEnv (..),
 
 import           Types                 ( Entity (..), EntityOccDef, Func,
                                          Scope (..), TypeC (..) )
-import Compute.AST (BluePrintAST)
+import           Types.AST             ( BluePrintAST )
 
 funcOccString :: Scope -> Func
 funcOccString (TopLevel func)   = func

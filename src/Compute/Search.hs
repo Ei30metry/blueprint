@@ -2,7 +2,7 @@ module Compute.Search where
 
 import           App                        ( BluePrint (..) )
 
-import           Compute.AST                ( BluePrintAST (..) )
+import           Types.AST                ( BluePrintAST (..) )
 import           Compute.Morphisms          ( entityToName, occNameFromEntity )
 
 import           Control.Lens.Combinators   ( Bifunctor (bimap), makeLenses )

@@ -97,7 +97,10 @@ runner4 = runGhcT (Just libdir) $ do
     (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
     (res, _) <- runBluePrint (searchInDefUses @String result) (gblEnv, ent)
     let name = entityToName ent gblEnv
-    mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
+    -- mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
+    case res of
+      Just x -> liftIO . defPrint $ ppr x
+      Nothing -> return ()
 
 
 printBindings :: FilePath -> IO ()

@@ -8,7 +8,7 @@ module Result ( banner
              , bluePrintASTtoTreeString'
              , defPrint ) where
 
-import           Compute.AST          ( BluePrintAST (..) )
+import           Types.AST          ( BluePrintAST (..) )
 
 import           Data.Coerce          ( coerce )
 import           Data.Text            ( Text, pack )

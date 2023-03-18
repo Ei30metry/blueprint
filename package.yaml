@@ -27,12 +27,12 @@ dependencies:
 - lens
 - ghc-lib
 - ghc-paths
-- text-show
 - lucid2
 - clay
 - aeson
 - aeson-pretty
-- lens-aeson
+- random
+- open-browser
 # - exceptions
 # - ghc-prim
 # - colour
@@ -40,8 +40,6 @@ dependencies:
 # - extra
 # - cereal
 # - vector
-# - prettyprinter
-# - prettyprinter-ansi-terminal
 # - monad-par
 # - parallel
 # - stack

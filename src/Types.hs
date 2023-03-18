@@ -46,5 +46,5 @@ data SearchEnv = SEnv { entity     :: Entity      -- The thing we are searching 
                       , withColor  :: Bool        -- Syntax highlighting
                       , lineNumber :: Bool        -- Show line numbers when printing outputs
                       , outputType :: OutputType  -- The type of result we expect
-                      , modPath    :: FilePath}   -- Path of the Module we are searching in
+                      , modPath    :: FilePath }   -- Path of the Module we are searching in
                 deriving (Show, Eq)

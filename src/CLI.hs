@@ -65,13 +65,13 @@ parseLineNumber = switch (long "line-number" <> short 'n'
 
 -- parses the output type. as of version 1, the default output would be Minimal
 parseOutputType :: Parser OutputType
-parseOutputType = parseMinimal <|> parseSource <|> parseHTML <|> parseImage <|> parseJSON
-  where parseImage = Image <$> option parseV (long "image" <> short 'i' <> metavar "FILE" <> help "Write the result to an image")
-        parseJSON = JSONOutput <$> option parseV (long "json" <> short 'j' <> metavar "FILE" <> value STDIO <> help "Write the result as a json file")
+parseOutputType = parseMinimal <|> parseImage <|> parseSource <|> parseJSON
+  where parseImage = Image <$> option parseV (long "image" <> short 'i' <> metavar "FILE" <> value Browser <> help "Write the result to an image")
+        parseJSON = JSONOutput <$> option parseF (long "json" <> short 'j' <> metavar "FILE" <> value STDIO <> help "Write the result as a json file")
         parseMinimal = Minimal <$> option parseF (long "minamal" <> short 'm' <> value STDIO <> help "Prints a minimal result to Stdio or a filepath")
         parseSource = SourceCode <$> option parseF (long "source-code" <> short 's' <> value STDIO <> help "Write the result as a Haskell source to a filePath")
         parseF = maybeReader $ \x -> Just (File x)
-        parseV = undefined
+        parseV = maybeReader $ \x -> Just (DumpFile x)
 
 -- parses all the search environment from the command line
 -- TODO parse type-signature flag (default is False)

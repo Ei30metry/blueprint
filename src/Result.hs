@@ -1,5 +1,4 @@
 module Result ( banner
-             , module Result.HTML
              , module Result.Minimal
              , module Result.JSON
              , module Result.Image
@@ -20,7 +19,6 @@ import           GHC.Utils.Outputable ( Outputable (..), SDoc,
                                         showPprUnsafe )
 import           GHC.Utils.Ppr        ( Mode (..) )
 
-import           Result.HTML
 import           Result.Image
 import           Result.JSON
 import           Result.Minimal

@@ -36,7 +36,6 @@ library
       Compute.Search
       Error
       Result
-      Result.HTML
       Result.Image
       Result.JSON
       Result.Minimal

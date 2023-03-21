@@ -43,3 +43,10 @@ bluePrintASTtoTreeString' = fmap (showPprUnsafe . ppr) . coerce @_ @(Tree a)
 
 defPrint :: SDoc -> IO ()
 defPrint = printSDocLn defaultSDocContext (PageMode True) stdout
+
+
+-- TODO
+-- class Result a where
+--   svgResult :: a -> b
+--   minimalResult :: a -> b
+--   jsonResult :: a -> b

@@ -39,7 +39,7 @@ resolver: lts-20.5
 
 
 extra-deps:
-  - clay-0.14.0
+  []
 
   # override default flag values for local packages and extra-deps
   # flags: {}

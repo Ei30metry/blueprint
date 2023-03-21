@@ -1,47 +1,53 @@
 module Main where
 
-import           App                    ( runBluePrint )
+import           App                        ( runBluePrint )
 
-import           Blueprint              ( initializeGhc, parseSourceFile',
-                                          prototypeFunc, seeFromTcGblEnv )
+import           Blueprint                  ( initializeGhc, parseSourceFile',
+                                              prototypeFunc, seeFromTcGblEnv )
 
-import           CLI                    ( parseSearchEnv )
+import           CLI                        ( parseSearchEnv )
 
-import           Compute                ( entityToGlbRdrElt, entityToName,
-                                          rnWithGlobalEnv', searchInDefUses )
+import           Compute                    ( entityToGlbRdrElt, entityToName,
+                                              rnWithGlobalEnv',
+                                              searchInDefUses )
 
-import           Control.Applicative    ( (<**>) )
-import           Control.Monad          ( (<=<) )
-import           Control.Monad.IO.Class ( liftIO )
+import GHC.Types.Name.Occurrence (HasOccName(..), occNameString)
+import           Control.Applicative        ( (<**>) )
+import           Control.Monad              ( (<=<) )
+import           Control.Monad.IO.Class     ( liftIO )
 
-import qualified Data.ByteString        as B
-import           Data.Functor.Classes   ( eq1 )
-import           Data.IORef             ( readIORef )
-import           Data.Text              ( pack )
-import           Data.Tree              ( drawTree )
-
-import           GHC                    ( GhcMonad (getSession),
-                                          LoadHowMuch (LoadAllTargets),
-                                          getModuleGraph, mgModSummaries,
-                                          moduleUnit, parseModule, runGhcT )
-import           GHC.Data.OrdList       ( fromOL )
-import           GHC.Paths              ( libdir )
-import           GHC.Plugins            ( sizeUniqSet )
-import           GHC.Tc.Types           ( TcGblEnv (..) )
-import           GHC.Types.Name.Reader  ( GlobalRdrElt (gre_imp, gre_lcl),
-                                          ImpDeclSpec (is_mod),
-                                          ImportSpec (is_decl, is_item),
-                                          pprGlobalRdrEnv )
-import           GHC.Utils.Outputable   ( ppr, showPprUnsafe )
-
-import           Options.Applicative    ( execParser, fullDesc, header, helper,
-                                          info, progDesc )
-
-import           Result                 ( bluePrintASTtoTreeString', defPrint,
-                                          prettyPrintJSON )
-
-import           Types                  ( SearchEnv (..) )
+import qualified Data.ByteString            as B
 import qualified Data.ByteString.Lazy.Char8 as B
+import           Data.Functor.Classes       ( eq1 )
+import           Data.IORef                 ( readIORef )
+import           Data.Text                  ( pack )
+import           Data.Tree                  ( drawTree )
+
+import           Diagrams.Backend.SVG       ( renderSVG, renderSVG' )
+
+import           GHC                        ( GhcMonad (getSession),
+                                              LoadHowMuch (LoadAllTargets),
+                                              getModuleGraph, mgModSummaries,
+                                              moduleUnit, parseModule, runGhcT )
+import           GHC.Data.OrdList           ( fromOL )
+import           GHC.Paths                  ( libdir )
+import           GHC.Plugins                ( sizeUniqSet )
+import           GHC.Tc.Types               ( TcGblEnv (..) )
+import           GHC.Types.Name.Reader      ( GlobalRdrElt (gre_imp, gre_lcl),
+                                              ImpDeclSpec (is_mod),
+                                              ImportSpec (is_decl, is_item),
+                                              pprGlobalRdrEnv )
+import           GHC.Utils.Outputable       ( ppr, showPprUnsafe )
+
+import           Options.Applicative        ( execParser, fullDesc, header,
+                                              helper, info, progDesc )
+
+import           Result                     ( bluePrintASTtoTreeString',
+                                              defPrint, pprBAST,
+                                              prettyPrintJSON,
+                                              createImage', createImage)
+
+import           Types                      ( SearchEnv (..) )
 
 
 main :: IO ()
@@ -99,7 +105,10 @@ runner4 = runGhcT (Just libdir) $ do
     let name = entityToName ent gblEnv
     -- mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
     case res of
-      Just x -> liftIO . defPrint $ ppr x
+      Just x  -> do
+        liftIO . putStrLn . pprBAST $ x
+        let tree = fmap (occNameString . occName) x
+        liftIO $ createImage tree
       Nothing -> return ()
 
 

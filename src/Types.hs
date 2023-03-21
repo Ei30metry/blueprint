@@ -35,7 +35,6 @@ data VisualView = Browser
                 | DumpFile FilePath deriving (Show, Eq)
 
 data OutputType = Image VisualView -- SVG view
-                | HTML VisualView  -- HTML View
                 | SourceCode Print -- Haskell source code
                 | Minimal Print    -- like UNIX tree command
                 | JSONOutput Print -- JSON Output

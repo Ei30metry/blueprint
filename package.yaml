@@ -27,12 +27,14 @@ dependencies:
 - lens
 - ghc-lib
 - ghc-paths
-- lucid2
-- clay
 - aeson
 - aeson-pretty
 - random
 - open-browser
+- diagrams-contrib
+- diagrams-core
+- diagrams-svg
+- diagrams-lib
 # - exceptions
 # - ghc-prim
 # - colour

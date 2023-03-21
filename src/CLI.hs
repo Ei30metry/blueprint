@@ -68,8 +68,7 @@ parseOutputType :: Parser OutputType
 parseOutputType = parseMinimal <|> parseSource <|> parseHTML <|> parseImage <|> parseJSON
   where parseImage = Image <$> option parseV (long "image" <> short 'i' <> metavar "FILE" <> help "Write the result to an image")
         parseJSON = JSONOutput <$> option parseV (long "json" <> short 'j' <> metavar "FILE" <> value STDIO <> help "Write the result as a json file")
-        parseHTML = HTML <$> option parseV (long "html" <> short 'w' <> metavar "FILE" <> value Browser <> help "Write the result to a PDF file")
-        parseMinimal = Minimal <$> option parseF (long "minamal" <> short 'm' <> value STDIO <> help "Print a minimal result to Stdio or a filepath")
+        parseMinimal = Minimal <$> option parseF (long "minamal" <> short 'm' <> value STDIO <> help "Prints a minimal result to Stdio or a filepath")
         parseSource = SourceCode <$> option parseF (long "source-code" <> short 's' <> value STDIO <> help "Write the result as a Haskell source to a filePath")
         parseF = maybeReader $ \x -> Just (File x)
         parseV = undefined

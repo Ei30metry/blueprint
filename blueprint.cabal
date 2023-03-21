@@ -81,12 +81,14 @@ library
     , aeson-pretty
     , base >=4.7 && <5
     , bytestring
-    , clay
     , containers
+    , diagrams-contrib
+    , diagrams-core
+    , diagrams-lib
+    , diagrams-svg
     , ghc-lib
     , ghc-paths
     , lens
-    , lucid2
     , mtl
     , open-browser
     , optparse-applicative
@@ -135,12 +137,14 @@ executable blueprint-exe
     , base >=4.7 && <5
     , blueprint
     , bytestring
-    , clay
     , containers
+    , diagrams-contrib
+    , diagrams-core
+    , diagrams-lib
+    , diagrams-svg
     , ghc-lib
     , ghc-paths
     , lens
-    , lucid2
     , mtl
     , open-browser
     , optparse-applicative
@@ -198,13 +202,15 @@ test-suite blueprint-test
     , base >=4.7 && <5
     , blueprint
     , bytestring
-    , clay
     , containers
+    , diagrams-contrib
+    , diagrams-core
+    , diagrams-lib
+    , diagrams-svg
     , ghc-lib
     , ghc-paths
     , hedgehog
     , lens
-    , lucid2
     , mtl
     , open-browser
     , optparse-applicative

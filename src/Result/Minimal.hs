@@ -6,10 +6,11 @@ module Result.Minimal where
 import           Data.Coerce
 import           Data.Text                 ( Text )
 import qualified Data.Text.Lazy.IO         as TLI
-import           Data.Tree                 ( Tree (..) )
+import           Data.Tree                 ( Tree (..), drawTree )
 
 import           GHC.Data.FastString       ( lengthFS )
-import           GHC.Types.Name.Occurrence ( HasOccName (..), OccName (occNameFS) )
+import           GHC.Types.Name.Occurrence ( HasOccName (..),
+                                             OccName (occNameFS), occNameString )
 import           GHC.Utils.Outputable      ( Outputable (..), SDoc, nest,
                                              pprHsChar, sep, underscore, vbar,
                                              ($+$), (<+>) )
@@ -24,24 +25,14 @@ import           Types.AST                 ( BluePrintAST (..) )
 prettyPrintAST :: Bool -> BluePrintAST a -> IO ()
 prettyPrintAST ast = undefined
 
-instance (Outputable a, HasOccName a) => Outputable (BluePrintAST a) where
-  ppr = pprBAST . coerce @_ @(Tree a)
+-- TODO try to rewrite pprBAST
+-- pprBAST' :: (Outputable a, HasOccName a) => Tree a -> SDoc
+-- pprBAST' (Node x []) = ppr x
+-- pprBAST' (Node x [t]) = ppr x <+> underscore <+> nest (lengthFS . occNameFS $ occName x) (pprBAST t)
+-- pprBAST' (Node x xs) = ppr x <+> underscore <+> nest indentForx (sep (map (($+$ vbar) . pprBAST) xs))
+--   where indentForx = lengthFS . occNameFS $ occName x
+--         height x = undefined
 
-
-{-
-desired output for `blueprint-exe function "f'" Golden5.hs`
-
-f' _ .
-     |
-     f _ .
-     |   |
-     |   +
-     |   |
-     |   show
-     |
-     g _ read
--}
-pprBAST :: (Outputable a, HasOccName a) => Tree a -> SDoc
-pprBAST (Node x []) = ppr x
-pprBAST (Node x xs) = ppr x <+> underscore <+> nest indentForx (sep (map (($+$ vbar). pprBAST) xs))
-  where indentForx = lengthFS . occNameFS $ occName x
+pprBAST :: forall a. HasOccName a => BluePrintAST a -> String
+pprBAST = drawTree . fmap occNameToString . coerce @_ @(Tree a)
+  where occNameToString = occNameString . occName

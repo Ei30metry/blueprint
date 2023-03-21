@@ -1,14 +1,5 @@
 module Result.HTML where
 
-import           Clay        ( Css, after, before, borderLeft, borderRight,
-                               borderTop, content, left, listStyleType, margin,
-                               option, padding, position, right, textAlign,
-                               transition, webkitPrefix, (&), (?) )
-
-import           Lucid       ( Html, a_, body_, div_, href_, html_, li_, link_,
-                               rel_, ul_ )
-import           Lucid.Html5 ( doctypehtml_ )
-
 import           System.IO   ( FilePath )
 
 import           Types       ( OutputType (HTML), VisualView (..) )

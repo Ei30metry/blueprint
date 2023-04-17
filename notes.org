@@ -257,11 +257,20 @@ main = runGhcT (Just libdir) $ do
 #+end_src
 "[ [Data.Text], [Golden6, Golden2, Golden2], [[]] ]" states that we have 3 `pack`s in scope, one of them was imported from Data.Text, one of them was imported from Golden2, Golden2 and Golden6 (they are all the same thing) and one of them was defined locally, i.e, not imported.
 ** checking to see if the module is in the packages or defined by the user
-*** TODO Use this logic for the recursion in NameSets
+*** DONE Use this logic for the recursion in NameSets
 1. Construct GlobalRdrEnv
 2. Search fot the GlobalRdrElt that you wnt
 3. Figure which one belongs to the home unit and is not imported from a library
 
 ** Moand stack idea
+** Blueprint of entities defined in non-home packages
+** Package Management
+- Generate a InstalledPackages file to pass to GHC because you can't access ghc as a library while building with Cabal
+- Dump InsatlledPackages as a String to feed to GHC as a -package
 
-* DONE Running a computation inside GHC using CPS
+* TODO Running a computation inside GHC using CPS
+* TODO Features
+** TODO Version 1
+** TODO Version 2
++ [ ] not having to run the command within the project
++ [ ] refactoring by knowing exactly what we need and what we don't

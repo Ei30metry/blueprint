@@ -48,6 +48,3 @@ astToTreeOutput = undefined
 
 astToSVGOutput :: forall a b. BluePrintAST a -> b
 astToSVGOutput = undefined
-
--- astToHTML :: forall a. BluePrintAST -> b
-astToHTML = undefined

@@ -40,7 +40,7 @@ l = g . f
 test12 :: Int -> String
 test12 = show . (+1) . id . f'
 
-test12' = show . (+1) . id . read . show . (+2)
+test12' = show . (+1) . id . read . test12 . (+2)
 
 f'' :: Int -> String
 f'' = f . f1

@@ -25,7 +25,8 @@ dependencies:
 - transformers
 - optparse-applicative
 - lens
-- ghc-lib
+# - ghc-lib
+- ghc
 - ghc-paths
 - aeson
 - aeson-pretty
@@ -35,6 +36,20 @@ dependencies:
 - diagrams-core
 - diagrams-svg
 - diagrams-lib
+- Cabal
+- Cabal-syntax
+- process
+- directory
+- ghc-boot
+- filepath
+- filepath
+- unix
+- unix-compat
+- directory
+- turtle
+- foldl
+- binary
+- terminfo
 # - exceptions
 # - ghc-prim
 # - colour
@@ -58,6 +73,7 @@ default-extensions:
   - TypeFamilies
   - TypeOperators
   - TypeApplications
+  - CPP
   - DataKinds
   - ViewPatterns
   - PolyKinds
@@ -73,6 +89,7 @@ default-extensions:
   - LambdaCase
   - FlexibleContexts
   - DerivingStrategies
+  - MagicHash
 
 ghc-options:
 - -Wall

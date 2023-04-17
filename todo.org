@@ -20,3 +20,24 @@
 + [ ] Add Haddock documentation
 + [ ] Add a Nix Flake
 + [ ] Seperate Computation Monad and Blueprint Monad
+
+* IDEA To checkout [0/3]
+** TODO source code responsible for ghc-pkg
+** TODO Cabal
++ [ ] Cabal/Src/Distribution/Types/LocalBuildInfo.hs
++ [ ] Cabal/Src/Distribution/Simple.hs
++ [ ] Cabal/src/Distribution/Simple/Utils.hs
+** TODO Cabal-install
++ [ ] cabal-install/src/Distribution/Client/ProjectConfig/Types.hs
++ [ ] cabal-install/src/Distribution/Client/ProjectOrchestration.hs
++ [ ] cabal-install/src/Distribution/Client/CmdBuild.hs
++ [ ] cabal-install/src/Distribution/Client/Types/PackageSpecifier.hs
++ [ ] cabal-install/src/Distribution/Client/NixStyleOptions.hs
++ [ ] cabal-install/src/Distribution/Client/Setup.hs
++ [ ] cabal-install/src/Distribution/Client/CmdBuild.hs
++ [ ] cabal-install/src/Distribution/Client/ScriptUtils.hs
+
+** TODO Cabal-install-solver
++ [ ] cabal-install-solver/src/Distribution/Solver/Types/PackageIndex.hs
++ [ ] cabal-install-solver/src/Distribution/Solver/Modular.hs
+* IDEA Implementation Ideas

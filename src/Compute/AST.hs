@@ -71,7 +71,6 @@ rnSrcToBindsBP :: forall m w. (GhcMonad m, Monoid w) => BluePrint RenamedSource 
 rnSrcToBindsBP = BT $ ask <&> hs_valds . view _1
 
 -- not exported by ghc-lib, so we define it locally
-
 dataConCantHappen :: DataConCantHappen -> a
 dataConCantHappen x = case x of {}
 

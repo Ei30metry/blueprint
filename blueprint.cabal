@@ -34,6 +34,7 @@ library
       Compute.AST
       Compute.Morphisms
       Compute.Search
+      Environment
       Error
       Result
       Result.Image
@@ -59,6 +60,7 @@ library
       TypeFamilies
       TypeOperators
       TypeApplications
+      CPP
       DataKinds
       ViewPatterns
       PolyKinds
@@ -74,26 +76,39 @@ library
       LambdaCase
       FlexibleContexts
       DerivingStrategies
+      MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      aeson
+      Cabal
+    , Cabal-syntax
+    , aeson
     , aeson-pretty
     , base >=4.7 && <5
+    , binary
     , bytestring
     , containers
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
     , diagrams-svg
-    , ghc-lib
+    , directory
+    , filepath
+    , foldl
+    , ghc
+    , ghc-boot
     , ghc-paths
     , lens
     , mtl
     , open-browser
     , optparse-applicative
+    , process
     , random
+    , terminfo
     , text
     , transformers
+    , turtle
+    , unix
+    , unix-compat
   default-language: Haskell2010
 
 executable blueprint-exe
@@ -114,6 +129,7 @@ executable blueprint-exe
       TypeFamilies
       TypeOperators
       TypeApplications
+      CPP
       DataKinds
       ViewPatterns
       PolyKinds
@@ -129,11 +145,15 @@ executable blueprint-exe
       LambdaCase
       FlexibleContexts
       DerivingStrategies
+      MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      Cabal
+    , Cabal-syntax
+    , aeson
     , aeson-pretty
     , base >=4.7 && <5
+    , binary
     , blueprint
     , bytestring
     , containers
@@ -141,28 +161,30 @@ executable blueprint-exe
     , diagrams-core
     , diagrams-lib
     , diagrams-svg
-    , ghc-lib
+    , directory
+    , filepath
+    , foldl
+    , ghc
+    , ghc-boot
     , ghc-paths
     , lens
     , mtl
     , open-browser
     , optparse-applicative
+    , process
     , random
+    , terminfo
     , text
     , transformers
+    , turtle
+    , unix
+    , unix-compat
   default-language: Haskell2010
 
 test-suite blueprint-test
   type: exitcode-stdio-1.0
   main-is: Tests.hs
   other-modules:
-      Golden.Golden1
-      Golden.Golden2
-      Golden.Golden3
-      Golden.Golden4
-      Golden.Golden5
-      Golden.Golden6
-      Golden.Golden7
       Test
       Paths_blueprint
   hs-source-dirs:
@@ -179,6 +201,7 @@ test-suite blueprint-test
       TypeFamilies
       TypeOperators
       TypeApplications
+      CPP
       DataKinds
       ViewPatterns
       PolyKinds
@@ -194,11 +217,15 @@ test-suite blueprint-test
       LambdaCase
       FlexibleContexts
       DerivingStrategies
+      MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      Cabal
+    , Cabal-syntax
+    , aeson
     , aeson-pretty
     , base >=4.7 && <5
+    , binary
     , blueprint
     , bytestring
     , containers
@@ -206,17 +233,26 @@ test-suite blueprint-test
     , diagrams-core
     , diagrams-lib
     , diagrams-svg
-    , ghc-lib
+    , directory
+    , filepath
+    , foldl
+    , ghc
+    , ghc-boot
     , ghc-paths
     , hedgehog
     , lens
     , mtl
     , open-browser
     , optparse-applicative
+    , process
     , random
     , tasty
     , tasty-golden
     , tasty-hedgehog
+    , terminfo
     , text
     , transformers
+    , turtle
+    , unix
+    , unix-compat
   default-language: Haskell2010

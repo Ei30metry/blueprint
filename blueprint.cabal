@@ -97,6 +97,7 @@ library
     , ghc
     , ghc-boot
     , ghc-paths
+    , hie-bios
     , lens
     , mtl
     , open-browser
@@ -167,6 +168,7 @@ executable blueprint-exe
     , ghc
     , ghc-boot
     , ghc-paths
+    , hie-bios
     , lens
     , mtl
     , open-browser
@@ -240,6 +242,7 @@ test-suite blueprint-test
     , ghc-boot
     , ghc-paths
     , hedgehog
+    , hie-bios
     , lens
     , mtl
     , open-browser

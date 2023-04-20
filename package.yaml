@@ -36,6 +36,7 @@ dependencies:
 - diagrams-core
 - diagrams-svg
 - diagrams-lib
+- hie-bios
 - Cabal
 - Cabal-syntax
 - process

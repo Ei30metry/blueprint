@@ -41,3 +41,6 @@
 + [ ] cabal-install-solver/src/Distribution/Solver/Types/PackageIndex.hs
 + [ ] cabal-install-solver/src/Distribution/Solver/Modular.hs
 * IDEA Implementation Ideas
++ Create Environment File
++ Tweak underlying stuff using the GHC.Unit.State module
++ Use hie-bios

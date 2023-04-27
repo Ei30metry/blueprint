@@ -25,9 +25,12 @@ dependencies:
 - transformers
 - optparse-applicative
 - lens
-# - ghc-lib
 - ghc
+- ghc-boot
+# - ghc-lib
+# - ghc-lib-parser
 - ghc-paths
+- cryptohash-sha1
 - aeson
 - aeson-pretty
 - random
@@ -37,11 +40,8 @@ dependencies:
 - diagrams-svg
 - diagrams-lib
 - hie-bios
-- Cabal
-- Cabal-syntax
 - process
 - directory
-- ghc-boot
 - filepath
 - filepath
 - unix
@@ -51,6 +51,7 @@ dependencies:
 - foldl
 - binary
 - terminfo
+- base16-bytestring
 # - exceptions
 # - ghc-prim
 # - colour
@@ -75,6 +76,7 @@ default-extensions:
   - TypeOperators
   - TypeApplications
   - CPP
+  - RecordWildCards
   - DataKinds
   - ViewPatterns
   - PolyKinds

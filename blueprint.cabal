@@ -34,7 +34,6 @@ library
       Compute.AST
       Compute.Morphisms
       Compute.Search
-      Environment
       Error
       Result
       Result.Image
@@ -61,6 +60,7 @@ library
       TypeOperators
       TypeApplications
       CPP
+      RecordWildCards
       DataKinds
       ViewPatterns
       PolyKinds
@@ -79,14 +79,14 @@ library
       MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      Cabal
-    , Cabal-syntax
-    , aeson
+      aeson
     , aeson-pretty
     , base >=4.7 && <5
+    , base16-bytestring
     , binary
     , bytestring
     , containers
+    , cryptohash-sha1
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
@@ -131,6 +131,7 @@ executable blueprint-exe
       TypeOperators
       TypeApplications
       CPP
+      RecordWildCards
       DataKinds
       ViewPatterns
       PolyKinds
@@ -149,15 +150,15 @@ executable blueprint-exe
       MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      Cabal
-    , Cabal-syntax
-    , aeson
+      aeson
     , aeson-pretty
     , base >=4.7 && <5
+    , base16-bytestring
     , binary
     , blueprint
     , bytestring
     , containers
+    , cryptohash-sha1
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
@@ -204,6 +205,7 @@ test-suite blueprint-test
       TypeOperators
       TypeApplications
       CPP
+      RecordWildCards
       DataKinds
       ViewPatterns
       PolyKinds
@@ -222,15 +224,15 @@ test-suite blueprint-test
       MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      Cabal
-    , Cabal-syntax
-    , aeson
+      aeson
     , aeson-pretty
     , base >=4.7 && <5
+    , base16-bytestring
     , binary
     , blueprint
     , bytestring
     , containers
+    , cryptohash-sha1
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib

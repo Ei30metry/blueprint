@@ -13,43 +13,75 @@ import           Compute.AST                   ( parseSourceFile,
                                                  valBindsToHsBinds )
 import           Compute.Morphisms             ( entityToGlbRdrElt )
 
-import           Control.Monad                 ( (<=<) )
-import           Control.Monad.Trans           ( lift )
+import           Control.Monad.Reader
+import           Control.Monad.Trans.Except    ( ExceptT, throwE )
 
-import           GHC                           ( Backend (NoBackend),
-                                                 GhcMonad (..), GhcRn,
+import           GHC                           ( Backend (NoBackend), GhcRn,
                                                  HsGroup (hs_valds),
                                                  LoadHowMuch (..),
                                                  ModSummary (..), Name (..),
+                                                 ParsedModule (..),
                                                  RenamedSource, backend,
-                                                 getModSummary, getSession,
+                                                 getModSummary,
                                                  getSessionDynFlags,
                                                  guessTarget, hs_valds, load,
                                                  mkModuleName, parseModule,
                                                  setSessionDynFlags, setTargets,
-                                                 typecheckModule, ParsedModule (ParsedModule) )
-import           GHC.Tc.Types                  ( TcGblEnv(..) )
+                                                 typecheckModule )
+import           GHC.Driver.Monad              ( GhcMonad (..) )
+import           GHC.Driver.Session
+import           GHC.Tc.Types                  ( TcGblEnv (..) )
 import           GHC.Types.Name.Reader         ( GlobalRdrElt )
 import           GHC.Types.Name.Set            ( DefUses )
 
+import           HIE.Bios                      hiding ( initSession )
+import           HIE.Bios.Environment
+
 import           Language.Haskell.Syntax.Binds ( HsValBinds )
+
+import           System.Directory
 
 import           Types                         ( Entity )
 
 
-mkFileModName :: FilePath -> String
-mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)
 
-initializeGhc :: GhcMonad m => FilePath -> m ModSummary
+
+-- FIXME terrible performance
+-- findModuleName :: String -> Either String String
+findModuleName :: Monad m => String -> ExceptT String m String
+findModuleName = nonMainModule . dropWhile (/= "module") . words
+  where nonMainModule []      = throwE "Empty file"
+        nonMainModule (_:x:_) = return x
+        nonMainModule _       = throwE "Couldn't file module name"
+
+
+-- | Sets up the right environment for ghc to compute on
+initializeGhc :: (GhcMonad m) => FilePath -> ExceptT String m ModSummary
 initializeGhc filePath = do
-  let fileModuleName = mkFileModName filePath
-  getSession
-  dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags { backend = NoBackend }
-  target <- guessTarget filePath Nothing
-  setTargets [target]
-  load LoadAllTargets -- TODO construct a Unit in order to feed your path to your module
-  getModSummary $ mkModuleName fileModuleName
+    fileContent <- liftIO $ readFile filePath
+    fileModuleName <- findModuleName fileContent
+    dir <- liftIO getCurrentDirectory
+    maybeCradle <- liftIO $ findCradle (dir <> "/")
+    mPath <- convertCradle maybeCradle
+    p <- liftIO $ return mPath
+    cradle <- liftIO (loadCradle p)
+    comp <- liftIO $ getCompilerOptions filePath cradle
+    setupOptions (fileModuleName, comp)
+
+  where
+    convertCradle :: Monad m => Maybe FilePath -> ExceptT String m FilePath
+    convertCradle (Just x) = return x
+    convertCradle Nothing  = throwE "Coudln't locate cradle"
+
+    setupOptions (modName , CradleSuccess r) = do
+            lift (initSession r)
+            dflags <- lift getSessionDynFlags
+            lift . setSessionDynFlags $ dflags { backend = NoBackend, ghcLink = LinkInMemory, ghcMode = CompManager }
+            target <- lift $ guessTarget filePath Nothing
+            lift $ setTargets [target] >> load LoadAllTargets
+            lift $ getModSummary $ mkModuleName modName
+
+    setupOptions _ = throwE "Cradle failed"
 
 
 rnSrcToBinds' :: GhcMonad m => RenamedSource -> m (HsValBinds GhcRn)
@@ -57,16 +89,17 @@ rnSrcToBinds' = return . hs_valds . \(b,_,_,_) -> b
 
 parseSourceFile' :: GhcMonad m => LoadHowMuch -> FilePath -> m ParsedModule
 parseSourceFile' loadHowMuch filePath = do
-  let fileModuleName = mkFileModName filePath
-  getSession
-  dflags <- getSessionDynFlags
-  setSessionDynFlags $ dflags { backend = NoBackend }
-  target <- guessTarget filePath Nothing
-  setTargets [target]
-  load loadHowMuch -- TODO construct a Unit in order to feed your path to your module
-  modSum <- getModSummary $ mkModuleName fileModuleName
-  parseModule modSum
-
+    let fileModuleName = mkFileModName filePath
+    getSession
+    dflags <- getSessionDynFlags
+    setSessionDynFlags $ dflags { backend = NoBackend }
+    target <- guessTarget filePath Nothing
+    setTargets [target]
+    load loadHowMuch -- TODO construct a Unit in order to feed your path to your module
+    modSum <- getModSummary $ mkModuleName fileModuleName
+    parseModule modSum
+  where
+    mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)
 
 prototypeFunc :: GhcMonad m => FilePath -> m [Name]
 prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd <=< rnWithGlobalEnv' <=< parseSourceFile' LoadAllTargets
@@ -75,7 +108,7 @@ prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd <=
 rnTest :: forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint ModSummary w m (Maybe GlobalRdrElt)
 rnTest ent = BT $ do
   parsed <- unBluePrint parseSourceFile
-  (glb,_) <- lift . lift $ rnWithGlobalEnv' parsed
+  (glb,_) <- lift . lift  $ rnWithGlobalEnv' parsed
   lift . lift . return $ entityToGlbRdrElt ent glb
 
 

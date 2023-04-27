@@ -271,6 +271,7 @@ main = runGhcT (Just libdir) $ do
 * TODO Running a computation inside GHC using CPS
 * TODO Features
 ** TODO Version 1
++ [ ] needs explicit hie.yaml file
 ** TODO Version 2
 + [ ] not having to run the command within the project
 + [ ] refactoring by knowing exactly what we need and what we don't

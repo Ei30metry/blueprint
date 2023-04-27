@@ -11,9 +11,9 @@ import           Compute                    ( entityToGlbRdrElt, entityToName,
                                               rnWithGlobalEnv',
                                               searchInDefUses )
 
-import GHC.Types.Name.Occurrence (HasOccName(..), occNameString)
 import           Control.Applicative        ( (<**>) )
 import           Control.Monad              ( (<=<) )
+import           Control.Monad.Except       ( runExceptT )
 import           Control.Monad.IO.Class     ( liftIO )
 
 import qualified Data.ByteString            as B
@@ -33,6 +33,7 @@ import           GHC.Data.OrdList           ( fromOL )
 import           GHC.Paths                  ( libdir )
 import           GHC.Plugins                ( sizeUniqSet )
 import           GHC.Tc.Types               ( TcGblEnv (..) )
+import           GHC.Types.Name.Occurrence  ( HasOccName (..), occNameString )
 import           GHC.Types.Name.Reader      ( GlobalRdrElt (gre_imp, gre_lcl),
                                               ImpDeclSpec (is_mod),
                                               ImportSpec (is_decl, is_item),
@@ -43,9 +44,9 @@ import           Options.Applicative        ( execParser, fullDesc, header,
                                               helper, info, progDesc )
 
 import           Result                     ( bluePrintASTtoTreeString',
+                                              createImage, createImage',
                                               defPrint, pprBAST,
-                                              prettyPrintJSON,
-                                              createImage', createImage)
+                                              prettyPrintJSON )
 
 import           Types                      ( SearchEnv (..) )
 
@@ -59,15 +60,19 @@ runner1 = runGhcT (Just libdir) $ do
     sEnv <- liftIO getSearchEnv
     let ent = entity sEnv
     let filePath = modPath sEnv
-    modSum <- initializeGhc filePath
-    (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
-    (result2, _) <- runBluePrint (seeFromTcGblEnv @String tcg_used_gres) modSum
-    fResult2 <- liftIO $ readIORef result2
-    -- liftIO . defPrint . ppr $ result
-    liftIO . defPrint . ppr $ toBinds $ fromOL result
-  where
-    toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
-  -- liftIO . printSDocLn defaultSDocContext (PageMode True) stdout . ppr $ fResult2
+    modSum' <- runExceptT $ initializeGhc filePath
+    case modSum' of
+      Right modSum -> do
+            (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
+            (result2, _) <- runBluePrint (seeFromTcGblEnv @String tcg_used_gres) modSum
+            fResult2 <- liftIO $ readIORef result2
+            -- liftIO . defPrint . ppr $ result
+            liftIO . defPrint . ppr $ toBinds $ fromOL result
+          where
+            toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
+          -- liftIO . printSDocLn defaultSDocContext (PageMode True) stdout . ppr $ fResult2
+      Left err -> liftIO $ putStrLn err
+
 
 runner2 :: IO ()
 runner2 = runGhcT (Just libdir) $ do
@@ -82,14 +87,17 @@ runner3 = runGhcT (Just libdir) $ do
     sEnv <- liftIO getSearchEnv
     let ent = entity sEnv
     let filePath = modPath sEnv
-    modSum <- initializeGhc filePath
-    parsed <- parseModule modSum
-    gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
-    let glbRdrElt = entityToGlbRdrElt ent gblEnv
-    let modNames = fmap (fmap (is_mod . is_decl) . gre_imp) glbRdrElt
-    modSummaries <- mgModSummaries <$> getModuleGraph
-    hsc <- getSession
-    liftIO . defPrint $ ppr glbRdrElt
+    modSum' <- runExceptT $ initializeGhc filePath
+    case modSum' of
+      Right modSum -> do
+          parsed <- parseModule modSum
+          gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
+          let glbRdrElt = entityToGlbRdrElt ent gblEnv
+          let modNames = fmap (fmap (is_mod . is_decl) . gre_imp) glbRdrElt
+          modSummaries <- mgModSummaries <$> getModuleGraph
+          hsc <- getSession
+          liftIO . defPrint $ ppr glbRdrElt
+      Left err-> liftIO $ putStrLn err
 
 
 runner4 :: IO ()
@@ -97,19 +105,23 @@ runner4 = runGhcT (Just libdir) $ do
     sEnv <- liftIO getSearchEnv
     let ent = entity sEnv
     let filePath = modPath sEnv
-    modSum <- initializeGhc filePath
-    parsed <- parseModule modSum
-    gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
-    (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
-    (res, _) <- runBluePrint (searchInDefUses @String result) (gblEnv, ent)
-    let name = entityToName ent gblEnv
-    -- mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
-    case res of
-      Just x  -> do
-        liftIO . putStrLn . pprBAST $ x
-        let tree = fmap (occNameString . occName) x
-        liftIO $ createImage tree
-      Nothing -> return ()
+    modSum' <- runExceptT $ initializeGhc filePath
+    case modSum' of
+      Right modSum -> do
+              parsed <- parseModule modSum
+              gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
+              (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
+              (res, _) <- runBluePrint (searchInDefUses @String result) (gblEnv, ent)
+              let name = entityToName ent gblEnv
+              -- mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
+              case res of
+                Just x  -> do
+                  liftIO . putStrLn . pprBAST $ x
+                  -- let tree = fmap (occNameString . occName) x
+                  -- liftIO $ createImage tree
+                Nothing -> return ()
+      Left x -> liftIO $ putStrLn x
+
 
 
 printBindings :: FilePath -> IO ()

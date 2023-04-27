@@ -40,8 +40,6 @@ resolver: lts-20.18
 
 
 extra-deps:
-  []
-
   # override default flag values for local packages and extra-deps
   # flags: {}
 

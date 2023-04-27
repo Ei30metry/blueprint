@@ -22,7 +22,8 @@ newtype BluePrint a w m b = BT { unBluePrint :: ReaderT a (WriterT w m) b}
 
 
 -- runs the Computation within the BluePrint monad
-runBluePrint :: BluePrint p w m a -> p -> m (a, w)
+-- runBluePrint :: BluePrint p w m b -> p -> m (b, w)
+runBluePrint :: BluePrint r w m a -> r -> m (a, w)
 runBluePrint computation env = runWriterT $ runReaderT (unBluePrint computation) env
 
 -- Lifts a function into the BluePrint monad

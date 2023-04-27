@@ -2,7 +2,7 @@
 #+author: Artin Ghasivand
 
 
-* TODO Things to polish before realising Version 1 [1/17]
+* TODO Things to polish before realising Version 1 [2/17]
 + [X] Replace String with Text
 + [ ] Add Unit tests
 + [ ] Add Property tests
@@ -12,7 +12,7 @@
 + [ ] Give better error messages
 + [ ] Mark safe and unsafe algorithms
 + [ ] Make all the imports and exports explicits
-+ [ ] Fix the problem with libraries
++ [X] Fix the problem with libraries
 + [ ] Make functions more GHCi friendly
 + [ ] Update the README File
 + [ ] Add a new minimal output type
@@ -41,6 +41,5 @@
 + [ ] cabal-install-solver/src/Distribution/Solver/Types/PackageIndex.hs
 + [ ] cabal-install-solver/src/Distribution/Solver/Modular.hs
 * IDEA Implementation Ideas
-+ Create Environment File
-+ Tweak underlying stuff using the GHC.Unit.State module
-+ Use hie-bios
+* IDEA Refactoring [/]
++ [ ] use `loadFile` from hie-bios instead of typechecking by hand

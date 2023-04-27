@@ -3,7 +3,6 @@ module Compute.Search where
 import           App                        ( BluePrint (..), runBluePrint )
 
 import           Compute.Morphisms          ( entityToName, occNameFromEntity )
-import           Types.AST ( BluePrintAST (..) )
 
 import           Control.Lens.Combinators   ( Bifunctor (bimap), makeLenses )
 import           Control.Lens.Getter        ()
@@ -11,7 +10,11 @@ import           Control.Lens.Lens          ()
 import           Control.Lens.Operators     ()
 import           Control.Lens.Setter        ()
 import           Control.Monad              ( filterM, join, (<=<) )
+import           Control.Monad.Except       ( MonadTrans (lift), join,
+                                              runExcept )
+import           Control.Monad.Trans
 import           Control.Monad.Trans        ( lift )
+import           Control.Monad.Trans.Except ( ExceptT, catchE, throwE, except )
 import           Control.Monad.Trans.Reader ( ask )
 
 import           Data.Bifunctor             ( Bifunctor (first) )
@@ -48,6 +51,7 @@ import           GHC.Types.Unique.Set       ( UniqSet )
 import           GHC.Unit                   ( homeUnitAsUnit )
 
 import           Types                      ( Entity (..), SearchEnv (..) )
+import           Types.AST                  ( BluePrintAST (..) )
 
 
 data CompEnv a = CompEnv { _elemName     :: GlobalRdrElt
@@ -63,30 +67,46 @@ searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntit
 -- Unsafe Type Synonym for telling the user that the NameSet should have 1 and only 1 element in it
 type Def = Defs
 
-buildUsageTree :: Name -> [(Def, Uses)] -> Maybe (BluePrintAST Name)
-buildUsageTree name [] = Just (pure name)
+
+buildUsageTree :: Name -> [(Def, Uses)] -> Either String (BluePrintAST Name)
+buildUsageTree name [] = Right (pure name)
 buildUsageTree name uses = coerce $ go name defUses
   where defUses = bimap (head . nonDetEltsUniqSet) nonDetEltsUniqSet <$> uses
-        go :: Name -> [(Name, [Name])] -> Maybe (Tree Name)
-        go root [] = Just (pure root)
+        go :: Name -> [(Name, [Name])] -> Either String (Tree Name)
+        go root [] = Right (pure root)
         go root defs = join (case find ((== root) . fst) defs of
-           Nothing    -> return $ Just (pure root)
+           Nothing    -> return $ Right (pure root)
            Just (d,u) -> return $ Node d <$> traverse (`go` defs) u)
 
-buildTypeUsageAST = undefined
-buildFunctionUsageAST = undefined
-buildUsageAST = undefined
-
--- TODO fix the function to use GlobalRdrEnv
-searchInDefUses :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint (GlobalRdrEnv, Entity) w m (Maybe (BluePrintAST Name))
+-- FIXME use a monad transformer instead of nested expressions
+searchInDefUses :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint String (GlobalRdrEnv, Entity) w m (BluePrintAST Name)
 searchInDefUses defUses = BT $ do
     let definitions = toBinds $ fromOL defUses
     (gblEnv, toSearchFor) <- ask
     let name = entityToName toSearchFor gblEnv
     case name of
-      Nothing -> return Nothing
-      Just n  -> return (buildUsageTree n =<< mapM helper definitions)
+      Left e -> lift (throwE e)
+      Right n  -> case buildUsageTree n =<< mapM helper definitions of
+        Right x  -> return x
+        Left err -> lift $ throwE err
   where
     toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
-    helper (Nothing, _) = Nothing
-    helper (Just x, y)  = Just (x, y)
+    helper (Nothing, _) = Left "couldn't find"
+    helper (Just x, y)  = Right (x, y)
+
+buildTypeUsageAST = undefined
+buildFunctionUsageAST = undefined
+buildUsageAST = undefined
+
+
+-- searchInDefUses' :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint String (GlobalRdrEnv, Entity) w m (BluePrintAST Name)
+-- searchInDefUses' defUses = BT $ do
+--     let definitions = toBinds $ fromOL defUses
+--     (gblEnv, toSearchFor) <- ask
+--     lift . lift $ do
+--       n <- except $ entityToName toSearchFor gblEnv
+--       buildUsageTree n =<< mapM helper definitions
+--   where
+--     toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
+--     helper (Nothing, _) = Left "couldn't find"
+--     helper (Just x, y)  = Right (x, y)

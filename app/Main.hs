@@ -13,8 +13,11 @@ import           Compute                    ( entityToGlbRdrElt, entityToName,
 
 import           Control.Applicative        ( (<**>) )
 import           Control.Monad              ( (<=<) )
-import           Control.Monad.Except       ( runExceptT )
+import           Control.Monad.Except       ( ExceptT (ExceptT),
+                                              runExcept, runExceptT)
 import           Control.Monad.IO.Class     ( liftIO )
+import           Control.Monad.Trans
+import           Control.Monad.Trans.Except ( except )
 
 import qualified Data.ByteString            as B
 import qualified Data.ByteString.Lazy.Char8 as B
@@ -33,6 +36,7 @@ import           GHC.Data.OrdList           ( fromOL )
 import           GHC.Paths                  ( libdir )
 import           GHC.Plugins                ( sizeUniqSet )
 import           GHC.Tc.Types               ( TcGblEnv (..) )
+import           GHC.Types.Name             ( Name (..) )
 import           GHC.Types.Name.Occurrence  ( HasOccName (..), occNameString )
 import           GHC.Types.Name.Reader      ( GlobalRdrElt (gre_imp, gre_lcl),
                                               ImpDeclSpec (is_mod),
@@ -48,58 +52,60 @@ import           Result                     ( bluePrintASTtoTreeString',
                                               defPrint, pprBAST,
                                               prettyPrintJSON )
 
-import           Types                      ( SearchEnv (..) )
+import           Types                      ( Entity (..), SearchEnv (..) )
+import           Types.AST                  ( BluePrintAST (..) )
 
 
 main :: IO ()
 main = runner4
 
 
-runner1 :: IO ()
-runner1 = runGhcT (Just libdir) $ do
-    sEnv <- liftIO getSearchEnv
-    let ent = entity sEnv
-    let filePath = modPath sEnv
-    modSum' <- runExceptT $ initializeGhc filePath
-    case modSum' of
-      Right modSum -> do
-            (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
-            (result2, _) <- runBluePrint (seeFromTcGblEnv @String tcg_used_gres) modSum
-            fResult2 <- liftIO $ readIORef result2
-            -- liftIO . defPrint . ppr $ result
-            liftIO . defPrint . ppr $ toBinds $ fromOL result
-          where
-            toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
-          -- liftIO . printSDocLn defaultSDocContext (PageMode True) stdout . ppr $ fResult2
-      Left err -> liftIO $ putStrLn err
+-- runner1 :: IO ()
+-- runner1 = runGhcT (Just libdir) $ do
+--     sEnv <- liftIO getSearchEnv
+--     let ent = entity sEnv
+--     let filePath = modPath sEnv
+--     modSum' <- runExceptT $ initializeGhc filePath
+--     case modSum' of
+--       Right modSum -> do
+--             (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
+--             (result2, _) <- runBluePrint (seeFromTcGblEnv @String tcg_used_gres) modSum
+--             fResult2 <- liftIO $ readIORef result2
+--             -- liftIO . defPrint . ppr $ result
+--             liftIO . defPrint . ppr $ toBinds $ fromOL result
+--           where
+--             toBinds = filter (\x -> fmap sizeUniqSet (fst x) `eq1` Just 1)
+--           -- liftIO . printSDocLn defaultSDocContext (PageMode True) stdout . ppr $ fResult2
+--       Left err -> liftIO $ putStrLn err
 
 
-runner2 :: IO ()
-runner2 = runGhcT (Just libdir) $ do
-  let path = "/Users/artin/Programming/projects/blueprint/test/golden/Golden2.hs"
-  parsed <- parseSourceFile' LoadAllTargets path
-  gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
-  liftIO . defPrint $ pprGlobalRdrEnv True gblEnv
+-- runner2 :: IO ()
+-- runner2 = runGhcT (Just libdir) $ do
+--   let path = "/Users/artin/Programming/projects/blueprint/test/golden/Golden2.hs"
+--   parsed <- parseSourceFile' LoadAllTargets path
+--   gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
+--   liftIO . defPrint $ pprGlobalRdrEnv True gblEnv
 
 
-runner3 :: IO ()
-runner3 = runGhcT (Just libdir) $ do
-    sEnv <- liftIO getSearchEnv
-    let ent = entity sEnv
-    let filePath = modPath sEnv
-    modSum' <- runExceptT $ initializeGhc filePath
-    case modSum' of
-      Right modSum -> do
-          parsed <- parseModule modSum
-          gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
-          let glbRdrElt = entityToGlbRdrElt ent gblEnv
-          let modNames = fmap (fmap (is_mod . is_decl) . gre_imp) glbRdrElt
-          modSummaries <- mgModSummaries <$> getModuleGraph
-          hsc <- getSession
-          liftIO . defPrint $ ppr glbRdrElt
-      Left err-> liftIO $ putStrLn err
+-- runner3 :: IO ()
+-- runner3 = runGhcT (Just libdir) $ do
+--     sEnv <- liftIO getSearchEnv
+--     let ent = entity sEnv
+--     let filePath = modPath sEnv
+--     modSum' <- runExceptT $ initializeGhc filePath
+--     case modSum' of
+--       Right modSum -> do
+--           parsed <- parseModule modSum
+--           gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
+--           let glbRdrElt = entityToGlbRdrElt ent gblEnv
+--           let modNames = fmap (fmap (is_mod . is_decl) . gre_imp) glbRdrElt
+--           modSummaries <- mgModSummaries <$> getModuleGraph
+--           hsc <- getSession
+--           liftIO . defPrint $ ppr glbRdrElt
+--       Left err-> liftIO $ putStrLn err
 
 
+-- FIXME lift everything to ExceptT
 runner4 :: IO ()
 runner4 = runGhcT (Just libdir) $ do
     sEnv <- liftIO getSearchEnv
@@ -111,16 +117,37 @@ runner4 = runGhcT (Just libdir) $ do
               parsed <- parseModule modSum
               gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
               (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
-              (res, _) <- runBluePrint (searchInDefUses @String result) (gblEnv, ent)
-              let name = entityToName ent gblEnv
-              -- mapM_ (liftIO . B.putStrLn . prettyPrintJSON) res
-              case res of
-                Just x  -> do
-                  liftIO . putStrLn . pprBAST $ x
-                  -- let tree = fmap (occNameString . occName) x
-                  -- liftIO $ createImage tree
-                Nothing -> return ()
+              case result of
+                Right x -> do
+                    (res, _) <- runBluePrint (searchInDefUses @String x) (gblEnv, ent)
+                    let name = entityToName ent gblEnv
+                    case res of
+                      Right result' -> do
+                        liftIO . putStrLn . pprBAST $ result'
+                      Left _ -> return ()
+                Left err -> liftIO $ putStrLn err
       Left x -> liftIO $ putStrLn x
+
+
+-- runnerEither :: IO ()
+-- runnerEither = runGhcT (Just libdir) $ do
+--     sEnv <- liftIO getSearchEnv
+--     let ent = entity sEnv
+--     let filepath = modPath sEnv
+--     x <- runExceptT $ t ent filepath
+--     return ()
+--   where
+--     t :: forall m . GhcMonad m => Entity -> FilePath -> ExceptT String m (BluePrintAST Name)
+--     t ent filePath = do
+--         modSum <- initializeGhc filePath
+--         parsed <- lift $ parseModule modSum
+--         (gblEnv, _) <- lift $ rnWithGlobalEnv' parsed
+--         let (result, _) = runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
+--         test <- except result
+--         (res, _) <- lift $ runBluePrint (searchInDefUses @String test) (gblEnv, ent)
+--         test2 <- except res
+--         name <- except $ entityToName ent gblEnv
+--         return test2
 
 
 

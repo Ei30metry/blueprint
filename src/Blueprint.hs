@@ -105,18 +105,20 @@ prototypeFunc :: GhcMonad m => FilePath -> m [Name]
 prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd <=< rnWithGlobalEnv' <=< parseSourceFile' LoadAllTargets
 
 
-rnTest :: forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint ModSummary w m (Maybe GlobalRdrElt)
+rnTest ::  forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint String ModSummary w m GlobalRdrElt
 rnTest ent = BT $ do
   parsed <- unBluePrint parseSourceFile
-  (glb,_) <- lift . lift  $ rnWithGlobalEnv' parsed
-  lift . lift . return $ entityToGlbRdrElt ent glb
+  (glb,_) <- lift . lift . lift $ rnWithGlobalEnv' parsed
+  case entityToGlbRdrElt ent glb of
+    Left err -> lift (throwE err)
+    Right x -> return x
 
 
-seeFromTcGblEnv :: forall w s m. (GhcMonad m, Monoid w) => (TcGblEnv -> s) -> BluePrint ModSummary w m s
+seeFromTcGblEnv :: forall w s m e. (GhcMonad m, Monoid w) => (TcGblEnv -> s) -> BluePrint e ModSummary w m s
 seeFromTcGblEnv fieldSelector = BT $ do
   parsed <- unBluePrint parseSourceFile
-  lift . lift $ return . fieldSelector . tcModuleToTcGblEnv <=< typecheckModule $ parsed
+  lift . lift . lift $ return . fieldSelector . tcModuleToTcGblEnv <=< typecheckModule $ parsed
 
 
-seeDefUses :: forall w m. (GhcMonad m, Monoid w) => BluePrint ModSummary w m DefUses
+seeDefUses :: forall w m e. (GhcMonad m, Monoid w) => BluePrint e ModSummary w m DefUses
 seeDefUses = seeFromTcGblEnv tcg_dus

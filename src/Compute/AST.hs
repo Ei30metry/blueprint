@@ -36,8 +36,8 @@ import           Types.AST                         ( DataConCantHappen )
 
 
 
-parseSourceFile :: forall w m. (Monoid w, GhcMonad m) => BluePrint ModSummary w m ParsedModule
-parseSourceFile = BT $ ask >>= \modSum -> lift . lift $ parseModule modSum
+parseSourceFile :: forall w m e. (Monoid w, GhcMonad m) => BluePrint e ModSummary w m ParsedModule
+parseSourceFile = BT $ ask >>= \modSum -> lift . lift . lift $ parseModule modSum
 
 
 tcModuleToTcGblEnv :: TypecheckedModule -> TcGblEnv
@@ -53,10 +53,10 @@ typeCheckedToRenamed = fromMaybe fix . tm_renamed_source
         explanation = "This shouldn't have happend. GHC couldn't rename the parsed module."
 
 
-rnWithGlobalEnv :: forall w m. (GhcMonad m, Monoid w) => BluePrint ParsedModule w m (GlobalRdrEnv, RenamedSource)
+rnWithGlobalEnv :: forall w m e. (GhcMonad m, Monoid w) => BluePrint e ParsedModule w m (GlobalRdrEnv, RenamedSource)
 rnWithGlobalEnv = BT $ do
     parsedAST <- ask
-    lift . lift $ go parsedAST
+    lift . lift . lift $ go parsedAST
   where
     go = return . glbWithRenamed <=< typecheckModule
     glbWithRenamed tcd = (typeCheckedToGlbEnv tcd, typeCheckedToRenamed tcd)
@@ -67,7 +67,7 @@ rnWithGlobalEnv' = return . glbWithRenamed <=< typecheckModule
   where glbWithRenamed tcd = (typeCheckedToGlbEnv tcd, typeCheckedToRenamed tcd)
 
 
-rnSrcToBindsBP :: forall m w. (GhcMonad m, Monoid w) => BluePrint RenamedSource w m (HsValBinds GhcRn)
+rnSrcToBindsBP :: forall m w e. (GhcMonad m, Monoid w) => BluePrint e RenamedSource w m (HsValBinds GhcRn)
 rnSrcToBindsBP = BT $ ask <&> hs_valds . view _1
 
 -- not exported by ghc-lib, so we define it locally

@@ -33,15 +33,17 @@ occNameFromEntity (FunctionE s _) = mkOccName varName . unpack $ funcOccString s
 
 
 -- This function should only be used to search the entity gathered from command line
-entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Maybe GlobalRdrElt
-entityToGlbRdrElt ent env = find gre_lcl $ lookupGlobalRdrEnv env (occNameFromEntity ent)
+entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Either String GlobalRdrElt
+entityToGlbRdrElt ent env = case find gre_lcl $ lookupGlobalRdrEnv env (occNameFromEntity ent) of
+  Nothing -> Left "Couldn't find the desierd GlobalRdrElt"
+  Just elt -> Right elt
 
 
-entityToName :: Entity -> GlobalRdrEnv -> Maybe Name
+entityToName :: Entity -> GlobalRdrEnv -> Either String Name
 entityToName ent = isNormalGreName <=< return . gre_name <=< entityToGlbRdrElt ent
   where isNormalGreName = \case
-          NormalGreName name -> Just name
-          _                  -> Nothing
+          NormalGreName name -> Right name
+          _                  -> Left "couldn't find name"
 
 astToTreeOutput :: forall a. BluePrintAST a -> Text
 astToTreeOutput = undefined

@@ -3,14 +3,10 @@ module App ( runBluePrint
            , BluePrint(..)
            ) where
 
-import           Control.Monad.Reader       ( MonadReader )
-import           Control.Monad.Trans        ( MonadIO, MonadTrans (..) )
 import           Control.Monad.Trans.Except ( ExceptT, runExceptT )
 import           Control.Monad.Trans.Reader ( ReaderT (runReaderT), ask )
 import           Control.Monad.Trans.Writer ( WriterT (runWriterT) )
-import           Control.Monad.Writer       ( MonadWriter )
 
-import           Data.Functor               ( (<&>) )
 
 
 -- newtype BluePrint a w m b = BT { unBluePrint :: ReaderT a (WriterT w m) b}
@@ -27,4 +23,3 @@ runBluePrint computation env = runWriterT . runExceptT $ runReaderT (unBluePrint
 -- Lifts a function into the BluePrint monad
 bluePrint :: (Monoid w, Monad m) => (a -> b) -> BluePrint e a w m b
 bluePrint f = BT $ f <$> ask
-

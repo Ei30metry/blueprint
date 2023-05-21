@@ -1,36 +1,30 @@
-name:                blueprint
+name:                blueprint-cli
 version:             0.1.0.0
 github:              "Ei30metry/blueprint"
 license:             BSD3
 author:              "Artin Ghasivand"
 maintainer:          "ghasivand.artin@gmail.com"
-copyright:           "2022 Artin Ghasivand"
+copyright:           "2023 Artin Ghasivand"
 
 extra-source-files:
 - README.md
 - CHANGELOG.md
 
 # Metadata used when publishing your package
-synopsis:            A CLI Tool for seeing all the underlying blocks of functions
-category:            Development
+# synopsis:            Short description of your package
+# category:            Web
 
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
 
 dependencies:
 - base >= 4.7 && < 5
+- optparse-applicative
 - text
 - bytestring
-- containers
-- mtl
-- transformers
-- optparse-applicative
-- lens
-- ghc
-- ghc-boot
-# - ghc-lib
-# - ghc-lib-parser
-- ghc-paths
-- cryptohash-sha1
+- blueprint-core
 - aeson
 - aeson-pretty
 - random
@@ -39,29 +33,13 @@ dependencies:
 - diagrams-core
 - diagrams-svg
 - diagrams-lib
-- hie-bios
-- process
-- directory
-- filepath
-- filepath
-- unix
-- unix-compat
-- directory
-- turtle
-- foldl
-- binary
 - terminfo
-- base16-bytestring
-# - exceptions
-# - ghc-prim
-# - colour
-# - fmt
-# - extra
-# - cereal
-# - vector
-# - monad-par
-# - parallel
-# - stack
+- transformers
+- containers
+- mtl
+# get rid of the dependencies below:
+- ghc-paths
+- ghc
 
 default-extensions:
   - AllowAmbiguousTypes
@@ -104,14 +82,12 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
-# - -fforce-recomp
 
 library:
   source-dirs: src
 
-
 executables:
-  blueprint-exe:
+  blueprint-cli-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -119,19 +95,15 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - blueprint
+    - blueprint-cli
 
 tests:
-  blueprint-test:
-    main:                Tests.hs
+  blueprint-cli-test:
+    main:                Spec.hs
     source-dirs:         test
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - blueprint
-    - tasty
-    - hedgehog
-    - tasty-hedgehog
-    - tasty-golden
+    - blueprint-cli

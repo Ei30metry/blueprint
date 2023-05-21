@@ -1,0 +1,96 @@
+name:                blueprint-core
+version:             0.1.0.0
+github:              "Ei30metry/blueprint/blueprint-core"
+license:             BSD3
+author:              "Artin Ghasivand"
+maintainer:          "ghasivand.artin@gmail.com"
+copyright:           "2022 Artin Ghasivand"
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+# Metadata used when publishing your package
+# TODO update
+synopsis:            A CLI Tool for seeing all the underlying blocks of functions
+category:            Development
+
+description:         Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- text
+- bytestring
+- containers
+- mtl
+- transformers
+- lens
+- ghc
+- ghc-boot
+- ghc-paths
+- hie-bios
+- filepath
+- unix
+- directory
+
+default-extensions:
+  - AllowAmbiguousTypes
+  - PatternSynonyms
+  - TupleSections
+  - MultiParamTypeClasses
+  - GADTs
+  - ScopedTypeVariables
+  - OverloadedStrings
+  - RankNTypes
+  - TypeFamilies
+  - TypeOperators
+  - TypeApplications
+  - CPP
+  - RecordWildCards
+  - DataKinds
+  - ViewPatterns
+  - PolyKinds
+  - DeriveGeneric
+  - KindSignatures
+  - StandaloneKindSignatures
+  - StandaloneDeriving
+  - RoleAnnotations
+  - TemplateHaskell
+  - EmptyCase
+  - GeneralizedNewtypeDeriving
+  - DeriveFunctor
+  - LambdaCase
+  - FlexibleContexts
+  - DerivingStrategies
+  - MagicHash
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+# - -fforce-recomp
+
+library:
+  source-dirs: src
+
+
+tests:
+  blueprint-test:
+    main:                Tests.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - blueprint-core
+    - tasty
+    - hedgehog
+    - tasty-hedgehog
+    - tasty-golden

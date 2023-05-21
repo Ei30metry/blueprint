@@ -14,7 +14,7 @@ import           Compute.AST                   ( parseSourceFile,
 import           Compute.Morphisms             ( entityToGlbRdrElt )
 
 import           Control.Monad.Reader
-import           Control.Monad.Trans.Except    ( ExceptT, throwE )
+import           Control.Monad.Trans.Except    ( ExceptT, except, throwE )
 
 import           GHC                           ( Backend (NoBackend), GhcRn,
                                                  HsGroup (hs_valds),
@@ -45,7 +45,6 @@ import           Types                         ( Entity )
 
 
 
-
 -- FIXME terrible performance
 -- findModuleName :: String -> Either String String
 findModuleName :: Monad m => String -> ExceptT String m String
@@ -69,13 +68,11 @@ initializeGhc filePath = do
     setupOptions (fileModuleName, comp)
 
   where
-    convertCradle :: Monad m => Maybe FilePath -> ExceptT String m FilePath
     convertCradle (Just x) = return x
     convertCradle Nothing  = throwE "Coudln't locate cradle"
 
     setupOptions (modName , CradleSuccess r) = do
-            lift (initSession r)
-            dflags <- lift getSessionDynFlags
+            dflags <- lift $ initSession r >> getSessionDynFlags
             lift . setSessionDynFlags $ dflags { backend = NoBackend, ghcLink = LinkInMemory, ghcMode = CompManager }
             target <- lift $ guessTarget filePath Nothing
             lift $ setTargets [target] >> load LoadAllTargets
@@ -87,11 +84,11 @@ initializeGhc filePath = do
 rnSrcToBinds' :: GhcMonad m => RenamedSource -> m (HsValBinds GhcRn)
 rnSrcToBinds' = return . hs_valds . \(b,_,_,_) -> b
 
+
 parseSourceFile' :: GhcMonad m => LoadHowMuch -> FilePath -> m ParsedModule
 parseSourceFile' loadHowMuch filePath = do
     let fileModuleName = mkFileModName filePath
-    getSession
-    dflags <- getSessionDynFlags
+    dflags <- getSession >> getSessionDynFlags
     setSessionDynFlags $ dflags { backend = NoBackend }
     target <- guessTarget filePath Nothing
     setTargets [target]
@@ -101,17 +98,17 @@ parseSourceFile' loadHowMuch filePath = do
   where
     mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)
 
+
 prototypeFunc :: GhcMonad m => FilePath -> m [Name]
-prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd <=< rnWithGlobalEnv' <=< parseSourceFile' LoadAllTargets
+prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd
+                <=< rnWithGlobalEnv' <=< parseSourceFile' LoadAllTargets
 
 
 rnTest ::  forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint String ModSummary w m GlobalRdrElt
 rnTest ent = BT $ do
   parsed <- unBluePrint parseSourceFile
   (glb,_) <- lift . lift . lift $ rnWithGlobalEnv' parsed
-  case entityToGlbRdrElt ent glb of
-    Left err -> lift (throwE err)
-    Right x -> return x
+  lift . except $ entityToGlbRdrElt ent glb
 
 
 seeFromTcGblEnv :: forall w s m e. (GhcMonad m, Monoid w) => (TcGblEnv -> s) -> BluePrint e ModSummary w m s

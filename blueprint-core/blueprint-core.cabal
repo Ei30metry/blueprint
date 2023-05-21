@@ -1,0 +1,154 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.1.
+--
+-- see: https://github.com/sol/hpack
+
+name:           blueprint-core
+version:        0.1.0.0
+synopsis:       A CLI Tool for seeing all the underlying blocks of functions
+description:    Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
+category:       Development
+homepage:       https://github.com/Ei30metry/blueprint#readme
+bug-reports:    https://github.com/Ei30metry/blueprint/issues
+author:         Artin Ghasivand
+maintainer:     ghasivand.artin@gmail.com
+copyright:      2022 Artin Ghasivand
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/Ei30metry/blueprint
+  subdir: blueprint-core
+
+library
+  exposed-modules:
+      App
+      Blueprint
+      Compute
+      Compute.AST
+      Compute.Morphisms
+      Compute.Search
+      Error
+      Types
+      Types.AST
+      Types.Compute
+      Types.Error
+      Types.Search
+  other-modules:
+      Paths_blueprint_core
+  hs-source-dirs:
+      src
+  default-extensions:
+      AllowAmbiguousTypes
+      PatternSynonyms
+      TupleSections
+      MultiParamTypeClasses
+      GADTs
+      ScopedTypeVariables
+      OverloadedStrings
+      RankNTypes
+      TypeFamilies
+      TypeOperators
+      TypeApplications
+      CPP
+      RecordWildCards
+      DataKinds
+      ViewPatterns
+      PolyKinds
+      DeriveGeneric
+      KindSignatures
+      StandaloneKindSignatures
+      StandaloneDeriving
+      RoleAnnotations
+      TemplateHaskell
+      EmptyCase
+      GeneralizedNewtypeDeriving
+      DeriveFunctor
+      LambdaCase
+      FlexibleContexts
+      DerivingStrategies
+      MagicHash
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , ghc
+    , ghc-boot
+    , ghc-paths
+    , hie-bios
+    , lens
+    , mtl
+    , text
+    , transformers
+    , unix
+  default-language: Haskell2010
+
+test-suite blueprint-test
+  type: exitcode-stdio-1.0
+  main-is: Tests.hs
+  other-modules:
+      Test
+      Paths_blueprint_core
+  hs-source-dirs:
+      test
+  default-extensions:
+      AllowAmbiguousTypes
+      PatternSynonyms
+      TupleSections
+      MultiParamTypeClasses
+      GADTs
+      ScopedTypeVariables
+      OverloadedStrings
+      RankNTypes
+      TypeFamilies
+      TypeOperators
+      TypeApplications
+      CPP
+      RecordWildCards
+      DataKinds
+      ViewPatterns
+      PolyKinds
+      DeriveGeneric
+      KindSignatures
+      StandaloneKindSignatures
+      StandaloneDeriving
+      RoleAnnotations
+      TemplateHaskell
+      EmptyCase
+      GeneralizedNewtypeDeriving
+      DeriveFunctor
+      LambdaCase
+      FlexibleContexts
+      DerivingStrategies
+      MagicHash
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , blueprint-core
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , ghc
+    , ghc-boot
+    , ghc-paths
+    , hedgehog
+    , hie-bios
+    , lens
+    , mtl
+    , tasty
+    , tasty-golden
+    , tasty-hedgehog
+    , text
+    , transformers
+    , unix
+  default-language: Haskell2010

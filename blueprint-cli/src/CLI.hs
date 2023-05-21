@@ -1,4 +1,5 @@
-module CLI (parseSearchEnv) where
+-- module CLI (parseSearchEnv) where
+module CLI where
 
 import           Control.Applicative         ( (<|>) )
 

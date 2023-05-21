@@ -4,16 +4,14 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           blueprint
+name:           blueprint-cli
 version:        0.1.0.0
-synopsis:       A CLI Tool for seeing all the underlying blocks of functions
-description:    Please see the README on GitHub at <https://github.com/Ei30metry/blueprint#readme>
-category:       Development
-homepage:       https://github.com/Ei30metry/blueprint#readme
-bug-reports:    https://github.com/Ei30metry/blueprint/issues
-author:         Artin Ghasivand
-maintainer:     ghasivand.artin@gmail.com
-copyright:      2022 Artin Ghasivand
+description:    Please see the README on GitHub at <https://github.com/githubuser/blueprint-cli#readme>
+homepage:       https://github.com/githubuser/blueprint-cli#readme
+bug-reports:    https://github.com/githubuser/blueprint-cli/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2023 Author name here
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,28 +21,18 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/Ei30metry/blueprint
+  location: https://github.com/githubuser/blueprint-cli
 
 library
   exposed-modules:
-      App
-      Blueprint
       CLI
-      Compute
-      Compute.AST
-      Compute.Morphisms
-      Compute.Search
-      Error
       Result
       Result.Image
       Result.JSON
       Result.Minimal
       Result.Source
-      Types
-      Types.AST
-      Types.Search
   other-modules:
-      Paths_blueprint
+      Paths_blueprint_cli
   hs-source-dirs:
       src
   default-extensions:
@@ -82,40 +70,28 @@ library
       aeson
     , aeson-pretty
     , base >=4.7 && <5
-    , base16-bytestring
-    , binary
+    , blueprint-core
     , bytestring
     , containers
-    , cryptohash-sha1
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
     , diagrams-svg
-    , directory
-    , filepath
-    , foldl
     , ghc
-    , ghc-boot
     , ghc-paths
-    , hie-bios
-    , lens
     , mtl
     , open-browser
     , optparse-applicative
-    , process
     , random
     , terminfo
     , text
     , transformers
-    , turtle
-    , unix
-    , unix-compat
   default-language: Haskell2010
 
-executable blueprint-exe
+executable blueprint-cli-exe
   main-is: Main.hs
   other-modules:
-      Paths_blueprint
+      Paths_blueprint_cli
   hs-source-dirs:
       app
   default-extensions:
@@ -153,43 +129,30 @@ executable blueprint-exe
       aeson
     , aeson-pretty
     , base >=4.7 && <5
-    , base16-bytestring
-    , binary
-    , blueprint
+    , blueprint-cli
+    , blueprint-core
     , bytestring
     , containers
-    , cryptohash-sha1
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
     , diagrams-svg
-    , directory
-    , filepath
-    , foldl
     , ghc
-    , ghc-boot
     , ghc-paths
-    , hie-bios
-    , lens
     , mtl
     , open-browser
     , optparse-applicative
-    , process
     , random
     , terminfo
     , text
     , transformers
-    , turtle
-    , unix
-    , unix-compat
   default-language: Haskell2010
 
-test-suite blueprint-test
+test-suite blueprint-cli-test
   type: exitcode-stdio-1.0
-  main-is: Tests.hs
+  main-is: Spec.hs
   other-modules:
-      Test
-      Paths_blueprint
+      Paths_blueprint_cli
   hs-source-dirs:
       test
   default-extensions:
@@ -227,37 +190,21 @@ test-suite blueprint-test
       aeson
     , aeson-pretty
     , base >=4.7 && <5
-    , base16-bytestring
-    , binary
-    , blueprint
+    , blueprint-cli
+    , blueprint-core
     , bytestring
     , containers
-    , cryptohash-sha1
     , diagrams-contrib
     , diagrams-core
     , diagrams-lib
     , diagrams-svg
-    , directory
-    , filepath
-    , foldl
     , ghc
-    , ghc-boot
     , ghc-paths
-    , hedgehog
-    , hie-bios
-    , lens
     , mtl
     , open-browser
     , optparse-applicative
-    , process
     , random
-    , tasty
-    , tasty-golden
-    , tasty-hedgehog
     , terminfo
     , text
     , transformers
-    , turtle
-    , unix
-    , unix-compat
   default-language: Haskell2010

@@ -3,9 +3,10 @@ module Main where
 import           App                        ( runBluePrint )
 
 import           Blueprint                  ( initializeGhc, parseSourceFile',
-                                              prototypeFunc, seeFromTcGblEnv )
+                                              prototypeFunc, seeDefUses,
+                                              seeFromTcGblEnv )
 
-import           CLI                        ( parseSearchEnv )
+-- import           CLI                        ( parseSearchEnv )
 
 import           Compute                    ( entityToGlbRdrElt, entityToName,
                                               rnWithGlobalEnv',
@@ -13,8 +14,8 @@ import           Compute                    ( entityToGlbRdrElt, entityToName,
 
 import           Control.Applicative        ( (<**>) )
 import           Control.Monad              ( (<=<) )
-import           Control.Monad.Except       ( ExceptT (ExceptT),
-                                              runExcept, runExceptT)
+import           Control.Monad.Except       ( ExceptT (ExceptT), runExcept,
+                                              runExceptT )
 import           Control.Monad.IO.Class     ( liftIO )
 import           Control.Monad.Trans
 import           Control.Monad.Trans.Except ( except )
@@ -26,7 +27,7 @@ import           Data.IORef                 ( readIORef )
 import           Data.Text                  ( pack )
 import           Data.Tree                  ( drawTree )
 
-import           Diagrams.Backend.SVG       ( renderSVG, renderSVG' )
+-- import           Diagrams.Backend.SVG       ( renderSVG, renderSVG' )
 
 import           GHC                        ( GhcMonad (getSession),
                                               LoadHowMuch (LoadAllTargets),
@@ -34,7 +35,8 @@ import           GHC                        ( GhcMonad (getSession),
                                               moduleUnit, parseModule, runGhcT )
 import           GHC.Data.OrdList           ( fromOL )
 import           GHC.Paths                  ( libdir )
-import           GHC.Plugins                ( sizeUniqSet )
+import           GHC.Plugins                ( sizeUniqSet, showPpr )
+import GHC.Types.Name.Set
 import           GHC.Tc.Types               ( TcGblEnv (..) )
 import           GHC.Types.Name             ( Name (..) )
 import           GHC.Types.Name.Occurrence  ( HasOccName (..), occNameString )
@@ -44,20 +46,20 @@ import           GHC.Types.Name.Reader      ( GlobalRdrElt (gre_imp, gre_lcl),
                                               pprGlobalRdrEnv )
 import           GHC.Utils.Outputable       ( ppr, showPprUnsafe )
 
-import           Options.Applicative        ( execParser, fullDesc, header,
-                                              helper, info, progDesc )
+-- import           Options.Applicative        ( execParser, fullDesc, header,
+--                                               helper, info, progDesc )
 
-import           Result                     ( bluePrintASTtoTreeString',
-                                              createImage, createImage',
-                                              defPrint, pprBAST,
-                                              prettyPrintJSON )
+-- import           Result                     ( bluePrintASTtoTreeString',
+--                                               createImage, createImage',
+--                                               defPrint, pprBAST,
+--                                               prettyPrintJSON )
 
 import           Types                      ( Entity (..), SearchEnv (..) )
 import           Types.AST                  ( BluePrintAST (..) )
 
 
 main :: IO ()
-main = runner4
+main = undefined -- runner4
 
 
 -- runner1 :: IO ()
@@ -106,27 +108,28 @@ main = runner4
 
 
 -- FIXME lift everything to ExceptT
-runner4 :: IO ()
-runner4 = runGhcT (Just libdir) $ do
-    sEnv <- liftIO getSearchEnv
-    let ent = entity sEnv
-    let filePath = modPath sEnv
-    modSum' <- runExceptT $ initializeGhc filePath
-    case modSum' of
-      Right modSum -> do
-              parsed <- parseModule modSum
-              gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
-              (result, _) <- runBluePrint (seeFromTcGblEnv @String tcg_dus) modSum
-              case result of
-                Right x -> do
-                    (res, _) <- runBluePrint (searchInDefUses @String x) (gblEnv, ent)
-                    let name = entityToName ent gblEnv
-                    case res of
-                      Right result' -> do
-                        liftIO . putStrLn . pprBAST $ result'
-                      Left _ -> return ()
-                Left err -> liftIO $ putStrLn err
-      Left x -> liftIO $ putStrLn x
+-- runner4 :: IO ()
+-- runner4 = runGhcT (Just libdir) $ do
+--     sEnv <- liftIO getSearchEnv
+--     let ent = entity sEnv
+--     let filePath = modPath sEnv
+--     modSum' <- runExceptT $ initializeGhc filePath
+--     case modSum' of
+--       Right modSum -> do
+--               parsed <- parseModule modSum
+--               gblEnv <- return . fst <=< rnWithGlobalEnv' $ parsed
+--               (result, _) <- runBluePrint (seeDefUses @String) modSum
+--               case result of
+--                 Right x -> do
+--                     (res, _) <- runBluePrint (searchInDefUses @String x) (gblEnv, ent)
+--                     let name = entityToName ent gblEnv
+--                     case res of
+--                       Right result' -> do
+--                         liftIO . putStrLn . pprBAST $ result'
+--                       Left _ -> return ()
+--                 Left err -> liftIO $ putStrLn err
+--       Left x -> liftIO $ putStrLn x
+
 
 
 -- runnerEither :: IO ()
@@ -151,21 +154,21 @@ runner4 = runGhcT (Just libdir) $ do
 
 
 
-printBindings :: FilePath -> IO ()
-printBindings filePath = runGhcT (Just libdir) $ do
-  result <- prototypeFunc filePath
-  liftIO . print $ showPprUnsafe result
+-- printBindings :: FilePath -> IO ()
+-- printBindings filePath = runGhcT (Just libdir) $ do
+--   result <- prototypeFunc filePath
+--   liftIO . print $ showPprUnsafe result
 
 
-printGatheredSEnv :: IO ()
-printGatheredSEnv = commandLineInterface >>= print
+-- printGatheredSEnv :: IO ()
+-- printGatheredSEnv = commandLineInterface >>= print
 
 
-commandLineInterface :: IO SearchEnv
-commandLineInterface = do
-  execParser (info (parseSearchEnv <**> helper)
-                          (fullDesc <> progDesc "Print recursive declerations of an entity"
-                           <> header "A different approach to showing outgoing call hierarchy for Haskell source code."))
+-- commandLineInterface :: IO SearchEnv
+-- commandLineInterface = do
+--   execParser (info (parseSearchEnv <**> helper)
+--                           (fullDesc <> progDesc "Print recursive declerations of an entity"
+--                            <> header "A different approach to showing outgoing call hierarchy for Haskell source code."))
 
-getSearchEnv :: IO SearchEnv
-getSearchEnv = commandLineInterface
+-- getSearchEnv :: IO SearchEnv
+-- getSearchEnv = commandLineInterface

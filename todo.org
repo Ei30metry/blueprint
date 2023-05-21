@@ -2,40 +2,45 @@
 #+author: Artin Ghasivand
 
 
-* TODO Things to polish before realising Version 1 [2/17]
+* TODO Things to polish before realising Version 1 [4/22]
 + [X] Replace String with Text
 + [ ] Add Unit tests
++ [ ] Rewrite Blueprint functionality in MTL styl
++ [ ] Add support for data typs
 + [ ] Add Property tests
 + [ ] Add Golden tests
 + [ ] Do Performance checks
-+ [ ] Replace Maybe with ExceptT
++ [ ] Add all the logging stuf to the Computation monad
++ [X] Replace Maybe with ExceptT
 + [ ] Give better error messages
 + [ ] Mark safe and unsafe algorithms
 + [ ] Make all the imports and exports explicits
 + [X] Fix the problem with libraries
 + [ ] Make functions more GHCi friendly
 + [ ] Update the README File
-+ [ ] Add a new minimal output type
++ [X] Add a new minimal output type
 + [ ] Try to make everything more Algebraic and composable
 + [ ] Add Haddock documentation
 + [ ] Add a Nix Flake
 + [ ] Seperate Computation Monad and Blueprint Monad
++ [ ] Signal error while using unsupported compiler version for the project
++ [ ] Split the project into these parts: blueprint-core - blueprint-debug - blueprint-substitute
 
-* IDEA To checkout [0/3]
-** TODO source code responsible for ghc-pkg
-** TODO Cabal
-+ [ ] Cabal/Src/Distribution/Types/LocalBuildInfo.hs
-+ [ ] Cabal/Src/Distribution/Simple.hs
-+ [ ] Cabal/src/Distribution/Simple/Utils.hs
-** TODO Cabal-install
-+ [ ] cabal-install/src/Distribution/Client/ProjectConfig/Types.hs
-+ [ ] cabal-install/src/Distribution/Client/ProjectOrchestration.hs
-+ [ ] cabal-install/src/Distribution/Client/CmdBuild.hs
-+ [ ] cabal-install/src/Distribution/Client/Types/PackageSpecifier.hs
-+ [ ] cabal-install/src/Distribution/Client/NixStyleOptions.hs
-+ [ ] cabal-install/src/Distribution/Client/Setup.hs
-+ [ ] cabal-install/src/Distribution/Client/CmdBuild.hs
-+ [ ] cabal-install/src/Distribution/Client/ScriptUtils.hs
+* IDEA To checkout [3/4]
+** DONE source code responsible for ghc-pkg
+** DONE Cabal
++ [X] Cabal/Src/Distribution/Types/LocalBuildInfo.hs
++ [X] Cabal/Src/Distribution/Simple.hs
++ [X] Cabal/src/Distribution/Simple/Utils.hs
+** DONE Cabal-install
++ [X] cabal-install/src/Distribution/Client/ProjectConfig/Types.hs
++ [X] cabal-install/src/Distribution/Client/ProjectOrchestration.hs
++ [X] cabal-install/src/Distribution/Client/CmdBuild.hs
++ [X] cabal-install/src/Distribution/Client/Types/PackageSpecifier.hs
++ [X] cabal-install/src/Distribution/Client/NixStyleOptions.hs
++ [X] cabal-install/src/Distribution/Client/Setup.hs
++ [X] cabal-install/src/Distribution/Client/CmdBuild.hs
++ [X] cabal-install/src/Distribution/Client/ScriptUtils.hs
 
 ** TODO Cabal-install-solver
 + [ ] cabal-install-solver/src/Distribution/Solver/Types/PackageIndex.hs

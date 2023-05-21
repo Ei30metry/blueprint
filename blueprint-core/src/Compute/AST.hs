@@ -7,7 +7,7 @@ import           Control.Monad                     ( (<=<) )
 import           Control.Monad.Trans               ( MonadTrans (..) )
 import           Control.Monad.Trans.Reader        ( ask )
 
-import           Data.Aeson                        ( ToJSON (..), object, (.=) )
+-- import           Data.Aeson                        ( ToJSON (..), object, (.=) )
 import           Data.Functor                      ( (<&>) )
 import           Data.Maybe                        ( fromMaybe )
 import           Data.Tree                         ( Tree (..) )
@@ -23,6 +23,7 @@ import           GHC                               ( GhcMonad (getSession),
                                                      tm_renamed_source,
                                                      typecheckModule )
 import           GHC.Generics                      ( Generic )
+import           GHC.Hs
 import           GHC.Hs.Utils                      ( CollectFlag (..),
                                                      collectHsValBinders )
 import           GHC.Tc.Types                      ( TcGblEnv (..) )
@@ -30,7 +31,6 @@ import           GHC.Types.Name.Reader             ( GlobalRdrEnv )
 import           GHC.Utils.Panic                   ( panic )
 
 import           Language.Haskell.Syntax.Extension ( IdP )
-
 
 import           Types.AST                         ( DataConCantHappen )
 
@@ -47,6 +47,7 @@ typeCheckedToGlbEnv :: TypecheckedModule -> GlobalRdrEnv
 typeCheckedToGlbEnv = tcg_rdr_env . tcModuleToTcGblEnv
 
 
+-- lift to ExceptT
 typeCheckedToRenamed :: TypecheckedModule -> RenamedSource
 typeCheckedToRenamed = fromMaybe fix . tm_renamed_source
   where fix = panic explanation

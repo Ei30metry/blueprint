@@ -14,7 +14,6 @@ import qualified Data.Time                  as TI
 
 import           System.IO                  ( writeFile )
 
-import           Turtle.Prelude             ( home )
 
 
 data TemplateHeaders = NameT String
@@ -48,6 +47,9 @@ instance Show TemplateHeaders where
 -- generates a list of Optional Headers based on the configuration
 optionalHeadersToGenerate :: OptHeader -> [TemplateHeaders]
 optionalHeadersToGenerate (OptH m a c) = [fst x | x <- zip [MeditationT, AlcoholT, CigaretteT] [m, a, c], snd x]
+
+home :: IO FilePath
+home = undefined
 
 -- write the template entry file to a file with the date as its name
 writeTemplate :: String -> TI.Day -> OptHeader -> IO ()

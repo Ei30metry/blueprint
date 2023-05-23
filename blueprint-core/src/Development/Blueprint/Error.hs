@@ -1,4 +1,4 @@
-module Error where
+module Development.Blueprint.Error where
 
 data ASTError = FromPrelude
 

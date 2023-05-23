@@ -28,18 +28,18 @@ source-repository head
 
 library
   exposed-modules:
-      App
-      Blueprint
-      Compute
-      Compute.AST
-      Compute.Morphisms
-      Compute.Search
-      Error
-      Types
-      Types.AST
-      Types.Compute
-      Types.Error
-      Types.Search
+      Development.Blueprint
+      Development.Blueprint.App
+      Development.Blueprint.Compute
+      Development.Blueprint.Compute.AST
+      Development.Blueprint.Compute.Morphisms
+      Development.Blueprint.Compute.Search
+      Development.Blueprint.Error
+      Development.Blueprint.Types
+      Development.Blueprint.Types.AST
+      Development.Blueprint.Types.Compute
+      Development.Blueprint.Types.Error
+      Development.Blueprint.Types.Search
   other-modules:
       Paths_blueprint_core
   hs-source-dirs:

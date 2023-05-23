@@ -1,4 +1,4 @@
-module Types( Entity(..), SearchEnv(..)
+module Development.Blueprint.Types( Entity(..), SearchEnv(..)
             , Scope(..), DepthLevel(..)
             , TypeC(..), EntityOccDef
             , ParentFunc, Func
@@ -6,6 +6,7 @@ module Types( Entity(..), SearchEnv(..)
             , Print(..), VisualView(..)) where
 
 import           Data.Text ( Text )
+
 
 data Entity = FunctionE Scope Bool
             | DataTypeE TypeC

@@ -79,7 +79,6 @@ ghc-options:
 library:
   source-dirs: src
 
-
 tests:
   blueprint-test:
     main:                Tests.hs

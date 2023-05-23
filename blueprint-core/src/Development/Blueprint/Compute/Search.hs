@@ -1,8 +1,9 @@
-module Compute.Search where
+module Development.Blueprint.Compute.Search where
 
-import           App                        ( BluePrint (..) )
+import           Development.Blueprint.App                        ( BluePrint (..) )
 
-import           Compute.Morphisms          ( entityToName, occNameFromEntity )
+import           Development.Blueprint.Compute.Morphisms          ( entityToName, occNameFromEntity )
+
 import           Control.Lens.Combinators   ( Bifunctor (bimap), makeLenses )
 import           Control.Lens.Getter
 import           Control.Lens.Lens
@@ -39,9 +40,9 @@ import           GHC.Types.Name.Reader      ( GlobalRdrElt, GlobalRdrEnv,
 import           GHC.Types.Name.Set         ( DefUses, Defs, NameSet, Uses )
 import           GHC.Types.TypeEnv          ( TypeEnv )
 
-import           Types                      ( Entity (..), SearchEnv (..) )
-import           Types.AST                  ( BluePrintAST (..) )
-import           Types.Error
+import           Development.Blueprint.Types                      ( Entity (..), SearchEnv (..) )
+import           Development.Blueprint.Types.AST                  ( BluePrintAST (..) )
+import           Development.Blueprint.Types.Error
 
 
 -- TODO experiment with st

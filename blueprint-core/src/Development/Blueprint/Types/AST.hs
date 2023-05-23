@@ -1,4 +1,4 @@
-module Types.AST ( DataConCantHappen
+module Development.Blueprint.Types.AST ( DataConCantHappen
                  , BluePrintAST(..)) where
 
 import           Data.Functor.Classes ( Show1 )

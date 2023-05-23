@@ -1,23 +1,25 @@
 -- this module's purpose is to serve as a straightforward way to convert
 -- GHC intenral types to blueprint types.
 
-module Compute.Morphisms where
+module Development.Blueprint.Compute.Morphisms where
 
 
-import           Control.Monad         ( (<=<) )
+import           Control.Monad                   ( (<=<) )
 
-import           Data.Foldable         ( find )
-import           Data.Text             ( Text, unpack )
+import           Data.Foldable                   ( find )
+import           Data.Text                       ( Text, unpack )
 
-import           GHC.Types.Avail       ( GreName (NormalGreName) )
-import           GHC.Types.Name        ( Name, OccName, mkOccName, tcName,
-                                         varName )
-import           GHC.Types.Name.Reader ( GlobalRdrElt (..), GlobalRdrEnv (..),
-                                         lookupGlobalRdrEnv )
+import           Development.Blueprint.Types     ( Entity (..), EntityOccDef,
+                                                   Func, Scope (..),
+                                                   TypeC (..) )
+import           Development.Blueprint.Types.AST ( BluePrintAST )
 
-import           Types                 ( Entity (..), EntityOccDef, Func,
-                                         Scope (..), TypeC (..) )
-import           Types.AST             ( BluePrintAST )
+import           GHC.Types.Avail                 ( GreName (NormalGreName) )
+import           GHC.Types.Name                  ( Name, OccName, mkOccName,
+                                                   tcName, varName )
+import           GHC.Types.Name.Reader           ( GlobalRdrElt (..),
+                                                   GlobalRdrEnv (..),
+                                                   lookupGlobalRdrEnv )
 
 funcOccString :: Scope -> Func
 funcOccString (TopLevel func)   = func
@@ -35,7 +37,7 @@ occNameFromEntity (FunctionE s _) = mkOccName varName . unpack $ funcOccString s
 -- This function should only be used to search the entity gathered from command line
 entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Either String GlobalRdrElt
 entityToGlbRdrElt ent env = case find gre_lcl $ lookupGlobalRdrEnv env (occNameFromEntity ent) of
-  Nothing -> Left "Couldn't find the desierd GlobalRdrElt"
+  Nothing  -> Left "Couldn't find the desierd GlobalRdrElt"
   Just elt -> Right elt
 
 

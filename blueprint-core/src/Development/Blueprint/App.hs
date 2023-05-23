@@ -1,4 +1,4 @@
-module App ( runBluePrint
+module Development.Blueprint.App ( runBluePrint
            , bluePrint
            , BluePrint(..)
            ) where

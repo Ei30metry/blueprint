@@ -1,6 +1,6 @@
-module Compute.AST where
+module Development.Blueprint.Compute.AST where
 
-import           App                               ( BluePrint (..) )
+import           Development.Blueprint.App                               ( BluePrint (..) )
 
 import           Control.Lens.Combinators          ( Field1 (_1), view )
 import           Control.Monad                     ( (<=<) )
@@ -32,7 +32,7 @@ import           GHC.Utils.Panic                   ( panic )
 
 import           Language.Haskell.Syntax.Extension ( IdP )
 
-import           Types.AST                         ( DataConCantHappen )
+import           Development.Blueprint.Types.AST                         ( DataConCantHappen )
 
 
 

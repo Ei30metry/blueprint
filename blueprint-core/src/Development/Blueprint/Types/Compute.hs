@@ -1,6 +1,6 @@
 -- | Computation monad, seperated from the BluePrint monad
 
-module Types.Compute where
+module Development.Blueprint.Types.Compute where
 
 import           Control.Monad.ST
 import           Control.Monad.Trans.Except ( ExceptT, runExceptT )

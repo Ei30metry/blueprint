@@ -1,0 +1,25 @@
+cradle:
+  stack:
+    - path: "blueprint-cli/src"
+      component: "blueprint-cli:lib"
+
+    - path: "blueprint-cli/app/Main.hs"
+      component: "blueprint-cli:exe:blueprint-cli-exe"
+
+    - path: "blueprint-cli/app/Paths_blueprint_cli.hs"
+      component: "blueprint-cli:exe:blueprint-cli-exe"
+
+    - path: "blueprint-cli/test"
+      component: "blueprint-cli:test:blueprint-cli-test"
+
+    - path: "blueprint-core/src"
+      component: "blueprint-core:lib"
+
+    - path: "blueprint-core/test"
+      component: "blueprint-core:test:blueprint-test"
+
+    - path: "blueprint-debug/src"
+      component: "blueprint-debug:lib"
+
+    - path: "blueprint-debug/test"
+      component: "blueprint-debug:test:blueprint-debug-test"

@@ -3,15 +3,16 @@ This module is the frontend to all the functionalities provided by blueprint and
 should be the only module needed in order to make a GUI client for Blueprint
 -}
 
-module Blueprint where
+-- TODO fix this
+module Development.Blueprint where
 
-import           App                           ( BluePrint (..) )
+import           Development.Blueprint.App                           ( BluePrint (..) )
 
-import           Compute.AST                   ( parseSourceFile,
+import           Development.Blueprint.Compute.AST                   ( parseSourceFile,
                                                  rnWithGlobalEnv',
                                                  tcModuleToTcGblEnv,
                                                  valBindsToHsBinds )
-import           Compute.Morphisms             ( entityToGlbRdrElt )
+import           Development.Blueprint.Compute.Morphisms             ( entityToGlbRdrElt )
 
 import           Control.Monad.Reader
 import           Control.Monad.Trans.Except    ( ExceptT, except, throwE )
@@ -41,7 +42,7 @@ import           Language.Haskell.Syntax.Binds ( HsValBinds )
 
 import           System.Directory
 
-import           Types                         ( Entity )
+import           Development.Blueprint.Types                         ( Entity )
 
 
 

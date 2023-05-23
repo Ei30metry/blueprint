@@ -1,14 +1,14 @@
 module Main where
 
-import           App                        ( runBluePrint )
+import           Development.Blueprint.App                        ( runBluePrint )
 
-import           Blueprint                  ( initializeGhc, parseSourceFile',
+import           Development.Blueprint ( initializeGhc, parseSourceFile',
                                               prototypeFunc, seeDefUses,
                                               seeFromTcGblEnv )
 
 -- import           CLI                        ( parseSearchEnv )
 
-import           Compute                    ( entityToGlbRdrElt, entityToName,
+import           Development.Blueprint.Compute                    ( entityToGlbRdrElt, entityToName,
                                               rnWithGlobalEnv',
                                               searchInDefUses )
 
@@ -54,8 +54,8 @@ import           GHC.Utils.Outputable       ( ppr, showPprUnsafe )
 --                                               defPrint, pprBAST,
 --                                               prettyPrintJSON )
 
-import           Types                      ( Entity (..), SearchEnv (..) )
-import           Types.AST                  ( BluePrintAST (..) )
+import           Development.Blueprint.Types                      ( Entity (..), SearchEnv (..) )
+import           Development.Blueprint.Types.AST                  ( BluePrintAST (..) )
 
 
 main :: IO ()

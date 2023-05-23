@@ -1,4 +1,4 @@
-module Lib
+module Debug.Lib
     ( someFunc
     ) where
 

@@ -1,6 +1,6 @@
 -- |
 
-module Types.Error where
+module Development.Blueprint.Types.Error where
 
 data CompEnvError = RnDeclError deriving Eq
 

@@ -7,24 +7,24 @@ module Result ( banner
              , bluePrintASTtoTreeString'
              , defPrint ) where
 
-import           Types.AST          ( BluePrintAST (..) )
+import           Data.Coerce                     ( coerce )
+import           Data.Text                       ( Text, pack )
+import qualified Data.Text                       as T
+import           Data.Tree                       ( Tree (..), drawTree )
 
-import           Data.Coerce          ( coerce )
-import           Data.Text            ( Text, pack )
-import qualified Data.Text            as T
-import           Data.Tree            ( Tree (..), drawTree )
+import           Development.Blueprint.Types.AST ( BluePrintAST (..) )
 
-import           GHC.Utils.Outputable ( Outputable (..), SDoc,
-                                        defaultSDocContext, printSDocLn,
-                                        showPprUnsafe )
-import           GHC.Utils.Ppr        ( Mode (..) )
+import           GHC.Utils.Outputable            ( Outputable (..), SDoc,
+                                                   defaultSDocContext,
+                                                   printSDocLn, showPprUnsafe )
+import           GHC.Utils.Ppr                   ( Mode (..) )
 
 import           Result.Image
 import           Result.JSON
 import           Result.Minimal
 import           Result.Source
 
-import           System.IO            ( stdout )
+import           System.IO                       ( stdout )
 
 
 banner :: Text -> Text

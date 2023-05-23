@@ -4,20 +4,21 @@ module Result.Minimal where
 
 
 import           Data.Coerce
-import           Data.Text                 ( Text )
-import qualified Data.Text.Lazy.IO         as TLI
-import           Data.Tree                 ( Tree (..), drawTree )
+import           Data.Text                       ( Text )
+import qualified Data.Text.Lazy.IO               as TLI
+import           Data.Tree                       ( Tree (..), drawTree )
 
-import           GHC.Data.FastString       ( lengthFS )
-import           GHC.Types.Name.Occurrence ( HasOccName (..),
-                                             OccName (occNameFS), occNameString )
-import           GHC.Utils.Outputable      ( Outputable (..), SDoc, nest,
-                                             pprHsChar, sep, underscore, vbar,
-                                             ($+$), (<+>) )
-import           GHC.Utils.Ppr             ( text )
+import           Development.Blueprint.Types.AST ( BluePrintAST (..) )
+
+import           GHC.Data.FastString             ( lengthFS )
+import           GHC.Types.Name.Occurrence       ( HasOccName (..),
+                                                   OccName (occNameFS),
+                                                   occNameString )
+import           GHC.Utils.Outputable            ( Outputable (..), SDoc, nest,
+                                                   pprHsChar, sep, underscore,
+                                                   vbar, ($+$), (<+>) )
+import           GHC.Utils.Ppr                   ( text )
 import           GHC.Utils.Ppr.Colour
-
-import           Types.AST                 ( BluePrintAST (..) )
 
 
 

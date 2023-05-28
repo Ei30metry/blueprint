@@ -1,61 +1,44 @@
 module Main where
 
-import           Development.Blueprint.App                        ( runBluePrint )
-
-import           Development.Blueprint ( initializeGhc, parseSourceFile',
-                                              prototypeFunc, seeDefUses,
-                                              seeFromTcGblEnv )
-
--- import           CLI                        ( parseSearchEnv )
-
-import           Development.Blueprint.Compute                    ( entityToGlbRdrElt, entityToName,
-                                              rnWithGlobalEnv',
-                                              searchInDefUses )
-
-import           Control.Applicative        ( (<**>) )
-import           Control.Monad              ( (<=<) )
-import           Control.Monad.Except       ( ExceptT (ExceptT), runExcept,
-                                              runExceptT )
-import           Control.Monad.IO.Class     ( liftIO )
+import           Control.Applicative             ( (<**>) )
+import           Control.Monad                   ( (<=<) )
+import           Control.Monad.Except            ( ExceptT (ExceptT), runExcept,
+                                                   runExceptT )
+import           Control.Monad.IO.Class          ( liftIO )
 import           Control.Monad.Trans
-import           Control.Monad.Trans.Except ( except )
+import           Control.Monad.Trans.Except      ( except )
 
-import qualified Data.ByteString            as B
-import qualified Data.ByteString.Lazy.Char8 as B
-import           Data.Functor.Classes       ( eq1 )
-import           Data.IORef                 ( readIORef )
-import           Data.Text                  ( pack )
-import           Data.Tree                  ( drawTree )
+import qualified Data.ByteString                 as B
+import qualified Data.ByteString.Lazy.Char8      as B
+import           Data.Functor.Classes            ( eq1 )
+import           Data.IORef                      ( readIORef )
+import           Data.Text                       ( pack )
+import           Data.Tree                       ( drawTree )
 
--- import           Diagrams.Backend.SVG       ( renderSVG, renderSVG' )
+import           Development.Blueprint           ( initializeGhc, seeDefUses,
+                                                   seeFromTcGblEnv )
+import           Development.Blueprint.App       ( runBluePrint )
+import           Development.Blueprint.Compute   ( entityToGlbRdrElt,
+                                                   entityToName,
+                                                   searchInDefUses, valBindsToHsBinds )
+import           Development.Blueprint.Types     ( Entity (..), SearchEnv (..) )
+import           Development.Blueprint.Types.AST ( BluePrintAST (..) )
 
-import           GHC                        ( GhcMonad (getSession),
-                                              LoadHowMuch (LoadAllTargets),
-                                              getModuleGraph, mgModSummaries,
-                                              moduleUnit, parseModule, runGhcT )
-import           GHC.Data.OrdList           ( fromOL )
-import           GHC.Paths                  ( libdir )
-import           GHC.Plugins                ( sizeUniqSet, showPpr )
-import GHC.Types.Name.Set
-import           GHC.Tc.Types               ( TcGblEnv (..) )
-import           GHC.Types.Name             ( Name (..) )
-import           GHC.Types.Name.Occurrence  ( HasOccName (..), occNameString )
-import           GHC.Types.Name.Reader      ( GlobalRdrElt (gre_imp, gre_lcl),
-                                              ImpDeclSpec (is_mod),
-                                              ImportSpec (is_decl, is_item),
-                                              pprGlobalRdrEnv )
-import           GHC.Utils.Outputable       ( ppr, showPprUnsafe )
-
--- import           Options.Applicative        ( execParser, fullDesc, header,
---                                               helper, info, progDesc )
-
--- import           Result                     ( bluePrintASTtoTreeString',
---                                               createImage, createImage',
---                                               defPrint, pprBAST,
---                                               prettyPrintJSON )
-
-import           Development.Blueprint.Types                      ( Entity (..), SearchEnv (..) )
-import           Development.Blueprint.Types.AST                  ( BluePrintAST (..) )
+import           GHC
+import           GHC.Data.OrdList                ( fromOL )
+import           GHC.Paths                       ( libdir )
+import           GHC.Plugins                     ( GlobalRdrEnv, showPpr,
+                                                   sizeUniqSet )
+import           GHC.Tc.Types                    ( TcGblEnv (..) )
+import           GHC.Types.Name                  ( Name (..) )
+import           GHC.Types.Name.Occurrence       ( HasOccName (..),
+                                                   occNameString )
+import           GHC.Types.Name.Reader           ( GlobalRdrElt (gre_imp, gre_lcl),
+                                                   ImpDeclSpec (is_mod),
+                                                   ImportSpec (is_decl, is_item),
+                                                   pprGlobalRdrEnv )
+import           GHC.Types.Name.Set
+import           GHC.Utils.Outputable            ( ppr, showPprUnsafe )
 
 
 main :: IO ()
@@ -172,3 +155,17 @@ main = undefined -- runner4
 
 -- getSearchEnv :: IO SearchEnv
 -- getSearchEnv = commandLineInterface
+
+
+parseSourceFile' :: GhcMonad m => LoadHowMuch -> FilePath -> m ParsedModule
+parseSourceFile' loadHowMuch filePath = do
+    let fileModuleName = mkFileModName filePath
+    dflags <- getSession >> getSessionDynFlags
+    setSessionDynFlags $ dflags { backend = NoBackend }
+    target <- guessTarget filePath Nothing
+    setTargets [target]
+    load loadHowMuch -- TODO construct a Unit in order to feed your path to your module
+    modSum <- getModSummary $ mkModuleName fileModuleName
+    parseModule modSum
+  where
+    mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)

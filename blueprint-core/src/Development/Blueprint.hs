@@ -6,57 +6,69 @@ should be the only module needed in order to make a GUI client for Blueprint
 -- TODO fix this
 module Development.Blueprint where
 
-import           Development.Blueprint.App                           ( BluePrint (..) )
+import           Control.Monad.Reader                    ( MonadIO (liftIO),
+                                                           MonadTrans (lift),
+                                                           (<=<) )
+import           Control.Monad.Trans.Except              ( ExceptT, except,
+                                                           throwE )
 
-import           Development.Blueprint.Compute.AST                   ( parseSourceFile,
-                                                 rnWithGlobalEnv',
-                                                 tcModuleToTcGblEnv,
-                                                 valBindsToHsBinds )
-import           Development.Blueprint.Compute.Morphisms             ( entityToGlbRdrElt )
+import           Development.Blueprint.App               ( BluePrint (..) )
+import           Development.Blueprint.Compute.AST       ( parseSourceFile,
+                                                           tcModuleToTcGblEnv,
+                                                           valBindsToHsBinds )
+import           Development.Blueprint.Compute.Morphisms ( entityToGlbRdrElt )
+import           Development.Blueprint.Error             ( PipelineError(..) )
+import           Development.Blueprint.Types             ( Entity )
 
-import           Control.Monad.Reader
-import           Control.Monad.Trans.Except    ( ExceptT, except, throwE )
+import           GHC                                     ( Backend (..),
+                                                           GhcPass (GhcRn),
+                                                           GhcRn,
+                                                           HsGroup (hs_valds),
+                                                           LoadHowMuch (..),
+                                                           ModSummary (..),
+                                                           Name (..),
+                                                           ParsedModule (..),
+                                                           RenamedSource,
+                                                           backend,
+                                                           getModSummary,
+                                                           getSessionDynFlags,
+                                                           guessTarget,
+                                                           hs_valds, load,
+                                                           mkModuleName,
+                                                           parseModule,
+                                                           setSessionDynFlags,
+                                                           setTargets,
+                                                           typecheckModule )
+import           GHC.Driver.Monad                        ( GhcMonad (..),
+                                                           getSessionDynFlags )
+import           GHC.Driver.Session                      ( DynFlags (backend, ghcLink, ghcMode),
+                                                           GhcLink (LinkInMemory),
+                                                           GhcMode (CompManager) )
+import           GHC.Tc.Types                            ( TcGblEnv (..) )
+import           GHC.Types.Name.Reader                   ( GlobalRdrElt )
+import           GHC.Types.Name.Set                      ( DefUses )
 
-import           GHC                           ( Backend (NoBackend), GhcRn,
-                                                 HsGroup (hs_valds),
-                                                 LoadHowMuch (..),
-                                                 ModSummary (..), Name (..),
-                                                 ParsedModule (..),
-                                                 RenamedSource, backend,
-                                                 getModSummary,
-                                                 getSessionDynFlags,
-                                                 guessTarget, hs_valds, load,
-                                                 mkModuleName, parseModule,
-                                                 setSessionDynFlags, setTargets,
-                                                 typecheckModule )
-import           GHC.Driver.Monad              ( GhcMonad (..) )
-import           GHC.Driver.Session
-import           GHC.Tc.Types                  ( TcGblEnv (..) )
-import           GHC.Types.Name.Reader         ( GlobalRdrElt )
-import           GHC.Types.Name.Set            ( DefUses )
+import           HIE.Bios                                ( CradleLoadResult (CradleSuccess),
+                                                           findCradle,
+                                                           getCompilerOptions,
+                                                           loadCradle )
+import           HIE.Bios.Environment                    ( initSession )
 
-import           HIE.Bios                      hiding ( initSession )
-import           HIE.Bios.Environment
-
-import           Language.Haskell.Syntax.Binds ( HsValBinds )
-
-import           System.Directory
-
-import           Development.Blueprint.Types                         ( Entity )
-
+import           System.Directory                        ( getCurrentDirectory )
 
 
 -- FIXME terrible performance
 -- findModuleName :: String -> Either String String
-findModuleName :: Monad m => String -> ExceptT String m String
+findModuleName :: Monad m => String -> ExceptT PipelineError m String
 findModuleName = nonMainModule . dropWhile (/= "module") . words
-  where nonMainModule []      = throwE "Empty file"
+  where nonMainModule []      = throwE EmptySrcFile
         nonMainModule (_:x:_) = return x
-        nonMainModule _       = throwE "Couldn't file module name"
+        nonMainModule _       = throwE CouldntFindModName
 
 
 -- | Sets up the right environment for ghc to compute on
-initializeGhc :: (GhcMonad m) => FilePath -> ExceptT String m ModSummary
+-- TODO use mtl
+initializeGhc :: (GhcMonad m) => FilePath -> ExceptT PipelineError m ModSummary
 initializeGhc filePath = do
     fileContent <- liftIO $ readFile filePath
     fileModuleName <- findModuleName fileContent
@@ -70,7 +82,7 @@ initializeGhc filePath = do
 
   where
     convertCradle (Just x) = return x
-    convertCradle Nothing  = throwE "Coudln't locate cradle"
+    convertCradle Nothing  = throwE NoCradle
 
     setupOptions (modName , CradleSuccess r) = do
             dflags <- lift $ initSession r >> getSessionDynFlags
@@ -79,39 +91,10 @@ initializeGhc filePath = do
             lift $ setTargets [target] >> load LoadAllTargets
             lift $ getModSummary $ mkModuleName modName
 
-    setupOptions _ = throwE "Cradle failed"
+    setupOptions _ = throwE FailedCradle
 
 
-rnSrcToBinds' :: GhcMonad m => RenamedSource -> m (HsValBinds GhcRn)
-rnSrcToBinds' = return . hs_valds . \(b,_,_,_) -> b
-
-
-parseSourceFile' :: GhcMonad m => LoadHowMuch -> FilePath -> m ParsedModule
-parseSourceFile' loadHowMuch filePath = do
-    let fileModuleName = mkFileModName filePath
-    dflags <- getSession >> getSessionDynFlags
-    setSessionDynFlags $ dflags { backend = NoBackend }
-    target <- guessTarget filePath Nothing
-    setTargets [target]
-    load loadHowMuch -- TODO construct a Unit in order to feed your path to your module
-    modSum <- getModSummary $ mkModuleName fileModuleName
-    parseModule modSum
-  where
-    mkFileModName = reverse . takeWhile (/= '/') . reverse . (\fp -> take (length fp - 3) fp)
-
-
-prototypeFunc :: GhcMonad m => FilePath -> m [Name]
-prototypeFunc = return . valBindsToHsBinds <=< rnSrcToBinds' <=< return . snd
-                <=< rnWithGlobalEnv' <=< parseSourceFile' LoadAllTargets
-
-
-rnTest ::  forall w m. (GhcMonad m, Monoid w) => Entity -> BluePrint String ModSummary w m GlobalRdrElt
-rnTest ent = BT $ do
-  parsed <- unBluePrint parseSourceFile
-  (glb,_) <- lift . lift . lift $ rnWithGlobalEnv' parsed
-  lift . except $ entityToGlbRdrElt ent glb
-
-
+-- TODO use mtl
 seeFromTcGblEnv :: forall w s m e. (GhcMonad m, Monoid w) => (TcGblEnv -> s) -> BluePrint e ModSummary w m s
 seeFromTcGblEnv fieldSelector = BT $ do
   parsed <- unBluePrint parseSourceFile

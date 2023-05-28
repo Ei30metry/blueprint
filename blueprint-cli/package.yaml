@@ -37,9 +37,9 @@ dependencies:
 - transformers
 - containers
 - mtl
-# get rid of the dependencies below:
 - ghc-paths
 - ghc
+- brick
 
 default-extensions:
   - AllowAmbiguousTypes

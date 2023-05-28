@@ -28,10 +28,12 @@ dependencies:
 - ghc
 - ghc-boot
 - ghc-paths
+- ghc-exactprint
 - hie-bios
 - filepath
 - unix
 - directory
+
 
 default-extensions:
   - AllowAmbiguousTypes

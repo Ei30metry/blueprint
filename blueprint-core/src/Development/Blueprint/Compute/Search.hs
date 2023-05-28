@@ -1,53 +1,60 @@
 module Development.Blueprint.Compute.Search where
 
-import           Development.Blueprint.App                        ( BluePrint (..) )
-
-import           Development.Blueprint.Compute.Morphisms          ( entityToName, occNameFromEntity )
-
-import           Control.Lens.Combinators   ( Bifunctor (bimap), makeLenses )
+import           Control.Lens.Combinators                ( Bifunctor (bimap),
+                                                           makeLenses )
 import           Control.Lens.Getter
 import           Control.Lens.Lens
 import           Control.Lens.Operators
 import           Control.Lens.Setter
-import           Control.Monad              ( join )
+import           Control.Monad                           ( join )
 import           Control.Monad.Trans
-import           Control.Monad.Trans.Except ( except )
-import           Control.Monad.Trans.Reader ( ask )
+import           Control.Monad.Trans.Except              ( except )
+import           Control.Monad.Trans.Reader              ( ask )
 
-import           Data.Coerce                ( coerce )
-import           Data.Foldable              ( find )
-import           Data.Functor.Classes       ( eq1 )
-import           Data.Maybe                 ( fromJust )
-import           Data.Tree                  ( Tree (..) )
-import           Data.Tree.Lens             ()
+import           Data.Coerce                             ( coerce )
+import           Data.Foldable                           ( find )
+import           Data.Functor.Classes                    ( eq1 )
+import           Data.Maybe                              ( fromJust )
+import           Data.Tree                               ( Tree (..) )
+import           Data.Tree.Lens                          ()
 
-import           GHC                        ( ClsInst, FamInst, GhcMonad (..),
-                                              GhcPass (GhcRn), GhcPs, GhcRn,
-                                              GhcTc, HsGroup, LHsBinds, LHsDecl,
-                                              Module, TyCon, moduleName,
-                                              moduleUnit )
-import           GHC.Core.FamInstEnv        ( FamInstEnv )
-import           GHC.Core.InstEnv           ( InstEnv )
-import           GHC.Core.PatSyn            ( PatSyn )
-import           GHC.Data.OrdList           ( fromOL )
-import           GHC.Plugins                ( AnnEnv, nonDetEltsUniqSet,
-                                              sizeUniqSet )
-import           GHC.Tc.Types               ( ImportAvails, TcGblEnv (..) )
-import           GHC.Types.Avail            ()
-import           GHC.Types.Name             ( Name (..) )
-import           GHC.Types.Name.Reader      ( GlobalRdrElt, GlobalRdrEnv,
-                                              lookupGlobalRdrEnv )
-import           GHC.Types.Name.Set         ( DefUses, Defs, NameSet, Uses )
-import           GHC.Types.TypeEnv          ( TypeEnv )
-
-import           Development.Blueprint.Types                      ( Entity (..), SearchEnv (..) )
-import           Development.Blueprint.Types.AST                  ( BluePrintAST (..) )
+import           Development.Blueprint.App               ( BluePrint (..) )
+import           Development.Blueprint.Compute.Morphisms ( entityToName,
+                                                           occNameFromEntity )
+import           Development.Blueprint.Types             ( Entity (..),
+                                                           SearchEnv (..) )
+import           Development.Blueprint.Types.AST         ( BluePrintAST (..) )
 import           Development.Blueprint.Types.Error
+
+import           GHC                                     ( ClsInst, FamInst,
+                                                           GhcMonad (..),
+                                                           GhcPass (GhcRn),
+                                                           GhcPs, GhcRn, GhcTc,
+                                                           HsGroup, LHsBinds,
+                                                           LHsDecl, Module,
+                                                           TyCon, moduleName,
+                                                           moduleUnit )
+import           GHC.Core.FamInstEnv                     ( FamInstEnv )
+import           GHC.Core.InstEnv                        ( InstEnv )
+import           GHC.Core.PatSyn                         ( PatSyn )
+import           GHC.Data.OrdList                        ( fromOL )
+import           GHC.Plugins                             ( AnnEnv,
+                                                           nonDetEltsUniqSet,
+                                                           sizeUniqSet )
+import           GHC.Tc.Types                            ( ImportAvails,
+                                                           TcGblEnv (..) )
+import           GHC.Types.Avail                         ()
+import           GHC.Types.Name                          ( Name (..) )
+import           GHC.Types.Name.Reader                   ( GlobalRdrElt,
+                                                           GlobalRdrEnv,
+                                                           lookupGlobalRdrEnv )
+import           GHC.Types.Name.Set                      ( DefUses, Defs,
+                                                           NameSet, Uses )
+import           GHC.Types.TypeEnv                       ( TypeEnv )
 
 
 -- TODO experiment with st
 data CompEnv a = CompEnv { _globalRdrEnv      :: GlobalRdrEnv
-                         -- , _usedGREs          :: [GlobalRdrElt]
                          , _renamedDecls      :: HsGroup a
                          , _currentModule     :: Module
                          , _typeEnv           :: TypeEnv
@@ -68,7 +75,6 @@ makeLenses ''CompEnv
 initCompEnv :: TcGblEnv -> Either CompEnvError (CompEnv GhcRn)
 initCompEnv (tcg_rn_decls -> Nothing) = Left RnDeclError
 initCompEnv TcGblEnv{..} = Right $ CompEnv { _globalRdrEnv = tcg_rdr_env
-                                           -- , _usedGREs = unTCRef tcg_used_gres
                                            , _renamedDecls = fromJust tcg_rn_decls
                                            , _currentModule = tcg_mod
                                            , _typeEnv = tcg_type_env
@@ -81,6 +87,7 @@ initCompEnv TcGblEnv{..} = Right $ CompEnv { _globalRdrEnv = tcg_rdr_env
                                            , _imports = tcg_imports
                                            , _patternSynonyms = tcg_patsyns
                                            , _topTyCons = tcg_tcs}
+
 
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]
 searchOccName sEnv rdrEnv = return $ lookupGlobalRdrEnv rdrEnv (occNameFromEntity . entity $ sEnv)
@@ -99,17 +106,6 @@ buildUsageTree name uses = coerce @(Either String (Tree Name)) $ go name dfUses
            Just (d,u) -> return $ Node d <$> traverse (`go` defs) u)
 
 
-buildUsageTree' :: Name -> [(Def, Uses)] -> Either String (BluePrintAST Name)
-buildUsageTree' name [] = Right (pure name)
-buildUsageTree' name uses = coerce $ go name dfUses
-  where dfUses = bimap (head . nonDetEltsUniqSet) nonDetEltsUniqSet <$> uses
-        go :: Name -> [(Name, [Name])] -> Either String (Tree Name)
-        go root [] = Right (pure root)
-        go root defs = join (case find ((== root) . fst) defs of
-           Nothing    -> return $ Right (pure root)
-           Just (d,u) -> return $ Node d <$> traverse (`go` defs) u)
-
-
 -- TODO refactor to output Datatype Structures too
 searchInDefUses :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint String (GlobalRdrEnv, Entity) w m (BluePrintAST Name)
 searchInDefUses dfUses = BT $ do
@@ -122,8 +118,3 @@ searchInDefUses dfUses = BT $ do
     helper (Nothing, _) = Left "couldn't find"
     helper (Just x, y)  = Right (x, y)
     transform = lift . except
-
-
-buildTypeUsageAST = undefined
-buildFunctionUsageAST = undefined
-buildUsageAST = undefined

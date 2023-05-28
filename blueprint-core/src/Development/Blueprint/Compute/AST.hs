@@ -1,38 +1,35 @@
 module Development.Blueprint.Compute.AST where
 
-import           Development.Blueprint.App                               ( BluePrint (..) )
+import           Control.Lens.Combinators        ( Field1 (_1), view )
+import           Control.Monad                   ( (<=<) )
+import           Control.Monad.Trans             ( MonadTrans (..) )
+import           Control.Monad.Trans.Reader      ( ask )
 
-import           Control.Lens.Combinators          ( Field1 (_1), view )
-import           Control.Monad                     ( (<=<) )
-import           Control.Monad.Trans               ( MonadTrans (..) )
-import           Control.Monad.Trans.Reader        ( ask )
+import           Data.Functor                    ( (<&>) )
+import           Data.Maybe                      ( fromMaybe )
+import           Data.Tree                       ( Tree (..) )
 
--- import           Data.Aeson                        ( ToJSON (..), object, (.=) )
-import           Data.Functor                      ( (<&>) )
-import           Data.Maybe                        ( fromMaybe )
-import           Data.Tree                         ( Tree (..) )
+import           Development.Blueprint.App       ( BluePrint (..) )
+import           Development.Blueprint.Error
+import           Development.Blueprint.Types.AST ( DataConCantHappen )
 
-import           GHC                               ( GhcMonad (getSession),
-                                                     GhcRn, HsValBinds (..),
-                                                     ModSummary,
-                                                     ParsedModule (..),
-                                                     RenamedSource (..),
-                                                     TypecheckedModule (tm_internals_, tm_renamed_source),
-                                                     backend, hs_valds,
-                                                     parseModule, tm_internals_,
-                                                     tm_renamed_source,
-                                                     typecheckModule )
-import           GHC.Generics                      ( Generic )
+import           GHC                             ( GhcMonad (getSession), GhcRn,
+                                                   HsValBinds (..), ModSummary,
+                                                   ParsedModule (..),
+                                                   RenamedSource (..),
+                                                   TypecheckedModule (tm_internals_, tm_renamed_source),
+                                                   backend, hs_valds,
+                                                   parseModule, tm_internals_,
+                                                   tm_renamed_source,
+                                                   typecheckModule )
+import           GHC.Generics                    ( Generic )
 import           GHC.Hs
-import           GHC.Hs.Utils                      ( CollectFlag (..),
-                                                     collectHsValBinders )
-import           GHC.Tc.Types                      ( TcGblEnv (..) )
-import           GHC.Types.Name.Reader             ( GlobalRdrEnv )
-import           GHC.Utils.Panic                   ( panic )
-
-import           Language.Haskell.Syntax.Extension ( IdP )
-
-import           Development.Blueprint.Types.AST                         ( DataConCantHappen )
+import           GHC.Hs.Utils                    ( CollectFlag (..),
+                                                   collectHsValBinders )
+import           GHC.Tc.Types                    ( TcGblEnv (..) )
+import           GHC.Types.Name.Reader           ( GlobalRdrEnv )
+import           GHC.Utils.Panic                 ( panic )
+import Control.Monad.Trans.Except (throwE)
 
 
 
@@ -48,24 +45,21 @@ typeCheckedToGlbEnv = tcg_rdr_env . tcModuleToTcGblEnv
 
 
 -- lift to ExceptT
-typeCheckedToRenamed :: TypecheckedModule -> RenamedSource
-typeCheckedToRenamed = fromMaybe fix . tm_renamed_source
-  where fix = panic explanation
-        explanation = "This shouldn't have happend. GHC couldn't rename the parsed module."
+typeCheckedToRenamed :: TypecheckedModule -> Either PipelineError RenamedSource
+typeCheckedToRenamed tchecked = case tm_renamed_source tchecked of
+  Just x -> Right x
+  Nothing -> Left GhcCouldntRename
 
 
-rnWithGlobalEnv :: forall w m e. (GhcMonad m, Monoid w) => BluePrint e ParsedModule w m (GlobalRdrEnv, RenamedSource)
+rnWithGlobalEnv :: forall w m e. (GhcMonad m, Monoid w) => BluePrint PipelineError ParsedModule w m (GlobalRdrEnv, RenamedSource)
 rnWithGlobalEnv = BT $ do
     parsedAST <- ask
-    lift . lift . lift $ go parsedAST
+    lift $ go parsedAST
   where
-    go = return . glbWithRenamed <=< typecheckModule
-    glbWithRenamed tcd = (typeCheckedToGlbEnv tcd, typeCheckedToRenamed tcd)
-
-
-rnWithGlobalEnv' :: GhcMonad m => ParsedModule -> m (GlobalRdrEnv, RenamedSource)
-rnWithGlobalEnv' = return . glbWithRenamed <=< typecheckModule
-  where glbWithRenamed tcd = (typeCheckedToGlbEnv tcd, typeCheckedToRenamed tcd)
+    go = glbWithRenamed <=< (lift . lift . typecheckModule)
+    glbWithRenamed tcd = case typeCheckedToRenamed tcd of
+      Right x -> return (typeCheckedToGlbEnv tcd, x)
+      Left err -> throwE err
 
 
 rnSrcToBindsBP :: forall m w e. (GhcMonad m, Monoid w) => BluePrint e RenamedSource w m (HsValBinds GhcRn)

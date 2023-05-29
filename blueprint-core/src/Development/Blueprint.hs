@@ -3,10 +3,11 @@ This module is the frontend to all the functionalities provided by blueprint and
 should be the only module needed in order to make a GUI client for Blueprint
 -}
 
--- TODO fix this
 module Development.Blueprint where
 
+import           Control.Monad.Except                    ( MonadError (..) )
 import           Control.Monad.Reader                    ( MonadIO (liftIO),
+                                                           MonadReader,
                                                            MonadTrans (lift),
                                                            (<=<) )
 import           Control.Monad.Trans.Except              ( ExceptT, except,
@@ -17,7 +18,7 @@ import           Development.Blueprint.Compute.AST       ( parseSourceFile,
                                                            tcModuleToTcGblEnv,
                                                            valBindsToHsBinds )
 import           Development.Blueprint.Compute.Morphisms ( entityToGlbRdrElt )
-import           Development.Blueprint.Error             ( PipelineError(..) )
+import           Development.Blueprint.Error             ( PipelineError (..) )
 import           Development.Blueprint.Types             ( Entity )
 
 import           GHC                                     ( Backend (..),
@@ -57,18 +58,15 @@ import           HIE.Bios.Environment                    ( initSession )
 import           System.Directory                        ( getCurrentDirectory )
 
 
--- FIXME terrible performance
--- findModuleName :: String -> Either String String
-findModuleName :: Monad m => String -> ExceptT PipelineError m String
+findModuleName :: (MonadError PipelineError m) => String -> m String
 findModuleName = nonMainModule . dropWhile (/= "module") . words
-  where nonMainModule []      = throwE EmptySrcFile
+  where nonMainModule []      = throwError EmptySrcFile
         nonMainModule (_:x:_) = return x
-        nonMainModule _       = throwE CouldntFindModName
+        nonMainModule _       = throwError CouldntFindModName
 
 
--- | Sets up the right environment for ghc to compute on
--- TODO use mtl
-initializeGhc :: (GhcMonad m) => FilePath -> ExceptT PipelineError m ModSummary
+-- | Sets up the right environment for ghc to start doing its job
+initializeGhc :: (MonadError PipelineError m, GhcMonad m) => FilePath -> m ModSummary
 initializeGhc filePath = do
     fileContent <- liftIO $ readFile filePath
     fileModuleName <- findModuleName fileContent
@@ -82,24 +80,23 @@ initializeGhc filePath = do
 
   where
     convertCradle (Just x) = return x
-    convertCradle Nothing  = throwE NoCradle
+    convertCradle Nothing  = throwError NoCradle
 
     setupOptions (modName , CradleSuccess r) = do
-            dflags <- lift $ initSession r >> getSessionDynFlags
-            lift . setSessionDynFlags $ dflags { backend = NoBackend, ghcLink = LinkInMemory, ghcMode = CompManager }
-            target <- lift $ guessTarget filePath Nothing
-            lift $ setTargets [target] >> load LoadAllTargets
-            lift $ getModSummary $ mkModuleName modName
+            dflags <- initSession r >> getSessionDynFlags
+            setSessionDynFlags $ dflags { backend = NoBackend, ghcLink = LinkInMemory, ghcMode = CompManager }
+            target <- guessTarget filePath Nothing
+            setTargets [target] >> load LoadAllTargets
+            getModSummary $ mkModuleName modName
 
-    setupOptions _ = throwE FailedCradle
-
-
--- TODO use mtl
-seeFromTcGblEnv :: forall w s m e. (GhcMonad m, Monoid w) => (TcGblEnv -> s) -> BluePrint e ModSummary w m s
-seeFromTcGblEnv fieldSelector = BT $ do
-  parsed <- unBluePrint parseSourceFile
-  lift . lift . lift $ return . fieldSelector . tcModuleToTcGblEnv <=< typecheckModule $ parsed
+    setupOptions _ = throwError FailedCradle
 
 
-seeDefUses :: forall w m e. (GhcMonad m, Monoid w) => BluePrint e ModSummary w m DefUses
+seeFromTcGblEnv :: (GhcMonad m, MonadReader ModSummary m) => (TcGblEnv -> s) -> m s
+seeFromTcGblEnv fieldSelector = do
+  parsed <- parseSourceFile
+  return . fieldSelector . tcModuleToTcGblEnv <=< typecheckModule $ parsed
+
+
+seeDefUses :: (GhcMonad m, MonadReader ModSummary m) => m DefUses
 seeDefUses = seeFromTcGblEnv tcg_dus

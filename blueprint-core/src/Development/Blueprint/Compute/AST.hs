@@ -2,19 +2,16 @@ module Development.Blueprint.Compute.AST where
 
 import           Control.Lens.Combinators        ( Field1 (_1), view )
 import           Control.Monad                   ( (<=<) )
-import           Control.Monad.Trans             ( MonadTrans (..) )
-import           Control.Monad.Trans.Reader      ( ask )
+import           Control.Monad.Except            ( MonadError (..) )
+import           Control.Monad.Reader            ( MonadReader (..) )
 
 import           Data.Functor                    ( (<&>) )
-import           Data.Maybe                      ( fromMaybe )
-import           Data.Tree                       ( Tree (..) )
 
-import           Development.Blueprint.App       ( BluePrint (..) )
-import           Development.Blueprint.Error
+import           Development.Blueprint.Error     ( PipelineError (GhcCouldntRename) )
 import           Development.Blueprint.Types.AST ( DataConCantHappen )
 
-import           GHC                             ( GhcMonad (getSession), GhcRn,
-                                                   HsValBinds (..), ModSummary,
+import           GHC                             ( GhcMonad (getSession),
+                                                   ModSummary,
                                                    ParsedModule (..),
                                                    RenamedSource (..),
                                                    TypecheckedModule (tm_internals_, tm_renamed_source),
@@ -22,19 +19,16 @@ import           GHC                             ( GhcMonad (getSession), GhcRn,
                                                    parseModule, tm_internals_,
                                                    tm_renamed_source,
                                                    typecheckModule )
-import           GHC.Generics                    ( Generic )
-import           GHC.Hs
-import           GHC.Hs.Utils                    ( CollectFlag (..),
+import           GHC.Hs                          ( CollectFlag (CollNoDictBinders),
+                                                   GhcRn, HsValBinds, IdP,
                                                    collectHsValBinders )
 import           GHC.Tc.Types                    ( TcGblEnv (..) )
 import           GHC.Types.Name.Reader           ( GlobalRdrEnv )
-import           GHC.Utils.Panic                 ( panic )
-import Control.Monad.Trans.Except (throwE)
 
 
 
-parseSourceFile :: forall w m e. (Monoid w, GhcMonad m) => BluePrint e ModSummary w m ParsedModule
-parseSourceFile = BT $ ask >>= \modSum -> lift . lift . lift $ parseModule modSum
+parseSourceFile :: (GhcMonad m, MonadReader ModSummary m) => m ParsedModule
+parseSourceFile = ask >>= parseModule
 
 
 tcModuleToTcGblEnv :: TypecheckedModule -> TcGblEnv
@@ -44,31 +38,28 @@ typeCheckedToGlbEnv :: TypecheckedModule -> GlobalRdrEnv
 typeCheckedToGlbEnv = tcg_rdr_env . tcModuleToTcGblEnv
 
 
--- lift to ExceptT
-typeCheckedToRenamed :: TypecheckedModule -> Either PipelineError RenamedSource
+typeCheckedToRenamed :: (MonadError PipelineError m) => TypecheckedModule -> m RenamedSource
 typeCheckedToRenamed tchecked = case tm_renamed_source tchecked of
-  Just x -> Right x
-  Nothing -> Left GhcCouldntRename
+  Just x  -> return x
+  Nothing -> throwError GhcCouldntRename
 
 
-rnWithGlobalEnv :: forall w m e. (GhcMonad m, Monoid w) => BluePrint PipelineError ParsedModule w m (GlobalRdrEnv, RenamedSource)
-rnWithGlobalEnv = BT $ do
+rnWithGlobalEnv :: (GhcMonad m, MonadError PipelineError m, MonadReader ParsedModule m) => m (GlobalRdrEnv, RenamedSource)
+rnWithGlobalEnv = do
     parsedAST <- ask
-    lift $ go parsedAST
+    go parsedAST
   where
-    go = glbWithRenamed <=< (lift . lift . typecheckModule)
+    go = glbWithRenamed <=< typecheckModule
     glbWithRenamed tcd = case typeCheckedToRenamed tcd of
-      Right x -> return (typeCheckedToGlbEnv tcd, x)
-      Left err -> throwE err
+      Right x  -> return (typeCheckedToGlbEnv tcd, x)
+      Left err -> throwError err
 
 
-rnSrcToBindsBP :: forall m w e. (GhcMonad m, Monoid w) => BluePrint e RenamedSource w m (HsValBinds GhcRn)
-rnSrcToBindsBP = BT $ ask <&> hs_valds . view _1
+rnSrcToBindsBP :: (GhcMonad m, MonadReader RenamedSource m) => m (HsValBinds GhcRn)
+rnSrcToBindsBP = ask <&> hs_valds . view _1
 
--- not exported by ghc-lib, so we define it locally
 dataConCantHappen :: DataConCantHappen -> a
 dataConCantHappen x = case x of {}
 
--- IdP GhcRn ~ Name
 valBindsToHsBinds :: HsValBinds GhcRn -> [IdP GhcRn]
 valBindsToHsBinds = collectHsValBinders CollNoDictBinders

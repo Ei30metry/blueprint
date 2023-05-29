@@ -108,7 +108,7 @@ buildUsageTree name uses = coerce @(Either String (Tree Name)) $ go name dfUses
 
 -- TODO refactor to output Datatype Structures too
 searchInDefUses :: forall w m. (GhcMonad m, Monoid w) => DefUses -> BluePrint String (GlobalRdrEnv, Entity) w m (BluePrintAST Name)
-searchInDefUses dfUses = BT $ do
+searchInDefUses dfUses = do
     let definitions = toBinds $ fromOL dfUses
     (gblEnv, toSearchFor) <- ask
     name <-  transform $ entityToName toSearchFor gblEnv

@@ -90,7 +90,6 @@ main = undefined -- runner4
 --       Left err-> liftIO $ putStrLn err
 
 
--- FIXME lift everything to ExceptT
 -- runner4 :: IO ()
 -- runner4 = runGhcT (Just libdir) $ do
 --     sEnv <- liftIO getSearchEnv

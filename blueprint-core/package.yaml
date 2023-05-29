@@ -33,6 +33,7 @@ dependencies:
 - filepath
 - unix
 - directory
+- criterion
 
 
 default-extensions:

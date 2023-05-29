@@ -79,6 +79,7 @@ library
       base >=4.7 && <5
     , bytestring
     , containers
+    , criterion
     , directory
     , filepath
     , ghc
@@ -137,6 +138,7 @@ test-suite blueprint-test
     , blueprint-core
     , bytestring
     , containers
+    , criterion
     , directory
     , filepath
     , ghc

@@ -42,7 +42,18 @@ import           GHC.Utils.Outputable            ( ppr, showPprUnsafe )
 
 
 main :: IO ()
-main = undefined -- runner4
+main = undefined >> exactprint >>= putStrLn
+
+runner :: IO ()
+runner = runGhcT (Just libdir) $ do
+  sEnv <- liftIO getSearchEnv
+  let ent = entity sEnv
+  let filePath = modPath sEnv
+  modSum <- runExcept $ initializeGhc filePath
+  case modsum of
+    Right x -> undefined
+    Left _ -> putStrLn "exited"
+  return ()
 
 
 -- runner1 :: IO ()

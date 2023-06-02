@@ -63,8 +63,11 @@ default-extensions:
   - GeneralizedNewtypeDeriving
   - DeriveFunctor
   - LambdaCase
+  - FunctionalDependencies
+  - UndecidableInstances
   - FlexibleContexts
   - DerivingStrategies
+  - FlexibleInstances
   - MagicHash
 
 ghc-options:

@@ -18,7 +18,7 @@ import           Data.Maybe                              ( fromJust )
 import           Data.Tree                               ( Tree (..) )
 import           Data.Tree.Lens                          ()
 
-import           Development.Blueprint.App               ( BluePrint (..) )
+import           Development.Blueprint.Monad ( BluePrint (..) )
 import           Development.Blueprint.Compute.Morphisms ( entityToName,
                                                            occNameFromEntity )
 import           Development.Blueprint.Types             ( Entity (..),
@@ -54,39 +54,6 @@ import           GHC.Types.TypeEnv                       ( TypeEnv )
 
 
 -- TODO experiment with st
-data CompEnv a = CompEnv { _globalRdrEnv      :: GlobalRdrEnv
-                         , _renamedDecls      :: HsGroup a
-                         , _currentModule     :: Module
-                         , _typeEnv           :: TypeEnv
-                         , _annotationEnv     :: AnnEnv
-                         , _instanceEnv       :: InstEnv
-                         , _topInstances      :: [ClsInst]
-                         , _defUses           :: DefUses
-                         , _familyInstances   :: [FamInst]
-                         , _familyInstanceEnv :: FamInstEnv
-                         , _imports           :: ImportAvails
-                         , _patternSynonyms   :: [PatSyn]
-                         , _topTyCons         :: [TyCon] }
-
-makeLenses ''CompEnv
-
--- TODO see if you can use ST for better performance and compatibitly with the current
--- typechecker API
-initCompEnv :: TcGblEnv -> Either CompEnvError (CompEnv GhcRn)
-initCompEnv (tcg_rn_decls -> Nothing) = Left RnDeclError
-initCompEnv TcGblEnv{..} = Right $ CompEnv { _globalRdrEnv = tcg_rdr_env
-                                           , _renamedDecls = fromJust tcg_rn_decls
-                                           , _currentModule = tcg_mod
-                                           , _typeEnv = tcg_type_env
-                                           , _annotationEnv = tcg_ann_env
-                                           , _instanceEnv = tcg_inst_env
-                                           , _topInstances = tcg_insts
-                                           , _defUses = tcg_dus
-                                           , _familyInstanceEnv = tcg_fam_inst_env
-                                           , _familyInstances = tcg_fam_insts
-                                           , _imports = tcg_imports
-                                           , _patternSynonyms = tcg_patsyns
-                                           , _topTyCons = tcg_tcs}
 
 
 searchOccName :: Monad m => SearchEnv -> GlobalRdrEnv -> m [GlobalRdrElt]

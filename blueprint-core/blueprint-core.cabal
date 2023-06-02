@@ -29,12 +29,15 @@ source-repository head
 library
   exposed-modules:
       Development.Blueprint
-      Development.Blueprint.App
       Development.Blueprint.Compute
       Development.Blueprint.Compute.AST
+      Development.Blueprint.Compute.CompEnv
       Development.Blueprint.Compute.Morphisms
       Development.Blueprint.Compute.Search
       Development.Blueprint.Error
+      Development.Blueprint.Monad
+      Development.Blueprint.Monad.BP
+      Development.Blueprint.Monad.Comp
       Development.Blueprint.Types
       Development.Blueprint.Types.AST
       Development.Blueprint.Types.Compute
@@ -71,8 +74,11 @@ library
       GeneralizedNewtypeDeriving
       DeriveFunctor
       LambdaCase
+      FunctionalDependencies
+      UndecidableInstances
       FlexibleContexts
       DerivingStrategies
+      FlexibleInstances
       MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
@@ -129,8 +135,11 @@ test-suite blueprint-test
       GeneralizedNewtypeDeriving
       DeriveFunctor
       LambdaCase
+      FunctionalDependencies
+      UndecidableInstances
       FlexibleContexts
       DerivingStrategies
+      FlexibleInstances
       MagicHash
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:

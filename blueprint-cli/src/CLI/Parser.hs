@@ -63,7 +63,7 @@ parseLineNumber = switch (long "line-number" <> short 'n'
 parseOutputType :: Parser OutputType
 parseOutputType = parseAscii <|> parseImage <|> parseSource
   where parseImage = Image <$> option parseV (long "image" <> short 'i' <> metavar "FILE" <> value Browser <> help "Write the result to an image")
-        parseAscii = Ascii <$> option parseF (long "minamal" <> short 'm' <> value STDIO <> help "Prints a minimal result to Stdio or a filepath")
+        parseAscii = Ascii <$> option parseF (long "ascii" <> short 'a' <> value STDIO <> help "Prints a minimal result to Stdio or a filepath")
         parseSource = SourceCode <$> option parseF (long "source-code" <> short 's' <> value STDIO <> help "Write the result as a Haskell source to a filePath")
         parseF = maybeReader $ \x -> Just (File x)
         parseV = maybeReader $ \x -> Just (DumpFile x)

@@ -2,19 +2,13 @@ module Development.Blueprint.Types( Entity(..), EntityName, SearchEnv(..)
             , Scope(..), DepthLevel(..)
             , TypeC(..), EntityOccDef
             , ParentFunc, Func
-            , LocalFunc, OutputFormat(..), OutputType(..)
+            , LocalFunc, OutputType(..)
             , Print(..), VisualView(..)) where
 
 import           Data.Text ( Text )
 
-data OutputFormat = FmtAscii
-                  | FmtImg
-                  deriving (Show, Eq)
-
-data Entity = FunctionE Scope Bool
-            | DataTypeE TypeC
-            | SubstituteE EntityName (Maybe SubLevel)
-            | ShowE EntityName OutputFormat
+data Entity = SubstituteE EntityName [EntityName]
+            | ShowE EntityName
             deriving (Show, Eq)
 
 data TypeC = TypeC { typeName       :: Text
@@ -25,8 +19,6 @@ type ParentFunc    = Text
 type Func          = Text
 type EntityOccDef  = Text
 type EntityName    = Text
-type SubLevel      = Int
-
 
 data Scope = TopLevel Func
            | ParentS ParentFunc LocalFunc deriving (Eq, Show)
@@ -44,8 +36,7 @@ data VisualView = Browser
 
 data OutputType = Image VisualView -- SVG view
                 | SourceCode Print -- Haskell source code
-                | Minimal Print    -- like UNIX tree command
-                | JSONOutput Print -- JSON Output
+                | Ascii Print    -- like UNIX tree command
                 deriving (Show, Eq)
 
 data SearchEnv = SEnv { entity     :: Entity      -- The thing we are searching for

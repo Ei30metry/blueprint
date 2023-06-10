@@ -3,3 +3,4 @@
 *.log
 tmp/
 *.stack-work/
+*.org

@@ -21,18 +21,15 @@ import           GHC.Types.Name.Reader           ( GlobalRdrElt (..),
                                                    GlobalRdrEnv (..),
                                                    lookupGlobalRdrEnv )
 
-funcOccString :: Scope -> Func
-funcOccString (TopLevel func)   = func
-funcOccString (ParentS _ lFunc) = lFunc
-
+-- FIXME: should work for both functions and types
 getEntityOccString :: Entity -> EntityOccDef
-getEntityOccString (DataTypeE t)   = typeName t
-getEntityOccString (FunctionE s _) = funcOccString s
+getEntityOccString (SubstituteE s _) = s
+getEntityOccString (ShowE s) = s
 
+-- FIXME: should work for both functions and types
 occNameFromEntity :: Entity -> OccName
-occNameFromEntity (DataTypeE t)   = mkOccName tcName . unpack $ typeName t
-occNameFromEntity (FunctionE s _) = mkOccName varName . unpack $ funcOccString s
-
+occNameFromEntity (SubstituteE s _) = mkOccName varName . unpack $ s
+occNameFromEntity (ShowE s) = mkOccName varName . unpack $ s
 
 -- This function should only be used to search the entity gathered from command line
 entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Either String GlobalRdrElt

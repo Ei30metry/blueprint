@@ -1,4 +1,4 @@
-module Development.Blueprint.Types( Entity(..), SearchEnv(..)
+module Development.Blueprint.Types( Entity(..), EntityName, SearchEnv(..)
             , Scope(..), DepthLevel(..)
             , TypeC(..), EntityOccDef
             , ParentFunc, Func
@@ -7,9 +7,8 @@ module Development.Blueprint.Types( Entity(..), SearchEnv(..)
 
 import           Data.Text ( Text )
 
-
-data Entity = FunctionE Scope Bool
-            | DataTypeE TypeC
+data Entity = SubstituteE EntityName [EntityName]
+            | ShowE EntityName
             deriving (Show, Eq)
 
 data TypeC = TypeC { typeName       :: Text
@@ -19,7 +18,7 @@ type LocalFunc     = Text
 type ParentFunc    = Text
 type Func          = Text
 type EntityOccDef  = Text
-
+type EntityName    = Text
 
 data Scope = TopLevel Func
            | ParentS ParentFunc LocalFunc deriving (Eq, Show)
@@ -37,8 +36,7 @@ data VisualView = Browser
 
 data OutputType = Image VisualView -- SVG view
                 | SourceCode Print -- Haskell source code
-                | Minimal Print    -- like UNIX tree command
-                | JSONOutput Print -- JSON Output
+                | Ascii Print    -- like UNIX tree command
                 deriving (Show, Eq)
 
 data SearchEnv = SEnv { entity     :: Entity      -- The thing we are searching for

@@ -29,8 +29,6 @@
 packages:
 - .
 
-  # extra-deps:
-
   # - acme-missiles-0.3
   # - git: https://github.com/commercialhaskell/stack.git
   #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
@@ -40,6 +38,8 @@ resolver: lts-20.18
 
 
 extra-deps:
+  # - hiedb-0.4.2.0
+  # - hie-compat-0.3.1.0
   # override default flag values for local packages and extra-deps
   # flags: {}
 

@@ -275,3 +275,7 @@ main = runGhcT (Just libdir) $ do
 ** TODO Version 2
 + [ ] not having to run the command within the project
 + [ ] refactoring by knowing exactly what we need and what we don't
+* IDEA Explaining blueprint
+when you are trying to talk about blueprint, use the fact that we all use code snippets when we are trying to create a slide for better engagement and in order to show the others what the purpose of the project is.
+
+Compare it with outoing call hierarchy

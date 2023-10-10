@@ -9,10 +9,9 @@ import           Control.Monad                   ( (<=<) )
 import           Data.Foldable                   ( find )
 import           Data.Text                       ( Text, unpack )
 
-import           Development.Blueprint.Types     ( Entity (..), EntityOccDef,
-                                                   Func, Scope (..),
-                                                   TypeC (..) )
-import           Development.Blueprint.Types.AST ( BluePrintAST )
+import           Development.Blueprint.Types     ( Entity (..), EntityName (..),
+                                                   EntityOccDef (..) )
+import           Development.Blueprint.Types.AST ( BluePrintAST (..) )
 
 import           GHC.Types.Avail                 ( GreName (NormalGreName) )
 import           GHC.Types.Name                  ( Name, OccName, mkOccName,
@@ -21,15 +20,17 @@ import           GHC.Types.Name.Reader           ( GlobalRdrElt (..),
                                                    GlobalRdrEnv (..),
                                                    lookupGlobalRdrEnv )
 
+-- NOTE we should figure out weathere it's a function or a type
 -- FIXME: should work for both functions and types
 getEntityOccString :: Entity -> EntityOccDef
-getEntityOccString (SubstituteE s _) = s
-getEntityOccString (ShowE s) = s
+getEntityOccString (SubstituteE s _) = EntityOccDef $ getEntityName s
+getEntityOccString (ShowE s)         = EntityOccDef $ getEntityName s
 
+-- NOTE we should figure out weathere it's a function or a type
 -- FIXME: should work for both functions and types
 occNameFromEntity :: Entity -> OccName
-occNameFromEntity (SubstituteE s _) = mkOccName varName . unpack $ s
-occNameFromEntity (ShowE s) = mkOccName varName . unpack $ s
+occNameFromEntity (SubstituteE s _) = mkOccName varName . unpack . getEntityName $ s
+occNameFromEntity (ShowE s) = mkOccName varName . unpack . getEntityName $ s
 
 -- This function should only be used to search the entity gathered from command line
 entityToGlbRdrElt :: Entity -> GlobalRdrEnv -> Either String GlobalRdrElt

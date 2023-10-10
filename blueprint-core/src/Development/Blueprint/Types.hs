@@ -1,8 +1,8 @@
-module Development.Blueprint.Types( Entity(..), EntityName, SearchEnv(..)
+module Development.Blueprint.Types( Entity(..), EntityName(..), SearchEnv(..)
             , Scope(..), DepthLevel(..)
-            , TypeC(..), EntityOccDef
-            , ParentFunc, Func
-            , LocalFunc, OutputType(..)
+            , TypeC(..), EntityOccDef(..)
+            , ParentFunc(..), Func(..)
+            , LocalFunc(..), OutputType(..)
             , Print(..), VisualView(..)) where
 
 import           Data.Text ( Text )
@@ -14,11 +14,11 @@ data Entity = SubstituteE EntityName [EntityName]
 data TypeC = TypeC { typeName       :: Text
                    , reduceSynonyms :: Bool   } deriving (Show, Eq)
 
-type LocalFunc     = Text
-type ParentFunc    = Text
-type Func          = Text
-type EntityOccDef  = Text
-type EntityName    = Text
+newtype LocalFunc    = LocalFunc    {getLF           :: Text} deriving (Show, Eq, Ord)
+newtype ParentFunc   = ParentFunc   {getParentF      :: Text} deriving (Show, Eq, Ord)
+newtype Func         = Func         {getFunc         :: Text} deriving (Show, Eq, Ord)
+newtype EntityOccDef = EntityOccDef {getEntityOccDef :: Text} deriving (Show, Eq, Ord)
+newtype EntityName   = EntityName   {getEntityName   :: Text} deriving (Show, Eq, Ord)
 
 data Scope = TopLevel Func
            | ParentS ParentFunc LocalFunc deriving (Eq, Show)

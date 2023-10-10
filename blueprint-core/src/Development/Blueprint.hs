@@ -20,6 +20,7 @@ import           GHC                               ( Backend (..), ClsInst,
                                                      GhcPs, GhcRn, GhcTc,
                                                      HsExpr (HsUnboundVar, HsVar),
                                                      HsGroup (hs_annds, hs_valds),
+                                                     HsRecField' (HsRecField),
                                                      LHsBinds, LHsExpr,
                                                      LImportDecl,
                                                      LoadHowMuch (..),
@@ -33,7 +34,7 @@ import           GHC                               ( Backend (..), ClsInst,
                                                      load, mkModuleName,
                                                      setSessionDynFlags,
                                                      setTargets,
-                                                     typecheckModule, HsRecField' (HsRecField) )
+                                                     typecheckModule )
 import           GHC.Core.FamInstEnv               ( FamInstEnv )
 import           GHC.Core.InstEnv                  ( InstEnv )
 import           GHC.Core.PatSyn                   ( PatSyn )
@@ -50,9 +51,9 @@ import           HIE.Bios                          ( CradleLoadResult (CradleSuc
                                                      loadCradle )
 import           HIE.Bios.Environment              ( initSession )
 
-import           Language.Haskell.Syntax.Expr
-import           Language.Haskell.Syntax.Decls
 import           Language.Haskell.Syntax.Binds
+import           Language.Haskell.Syntax.Decls
+import           Language.Haskell.Syntax.Expr
 
 import           System.Directory                  ( getCurrentDirectory )
 
@@ -138,7 +139,6 @@ seeInstEnv = seeFromTcGblEnv tcg_inst_env
 seeAnnEnv :: GhcReader ParsedModule m => m AnnEnv
 seeAnnEnv = seeFromTcGblEnv tcg_ann_env
 
-
 seeRenamedDecls :: (GhcReader ParsedModule m, MonadError PipelineError m) => m (HsGroup GhcRn)
 seeRenamedDecls = seeFromTcGblEnv tcg_rn_decls >>= reportRenamed
   where reportRenamed Nothing  = throwError GhcCouldntRename
@@ -147,7 +147,6 @@ seeRenamedDecls = seeFromTcGblEnv tcg_rn_decls >>= reportRenamed
 
 seeBinds :: GhcReader ParsedModule m => m (LHsBinds GhcTc)
 seeBinds = seeFromTcGblEnv tcg_binds
-
 
 seeTyCons :: GhcReader ParsedModule m => m [TyCon]
 seeTyCons = seeFromTcGblEnv tcg_tcs
@@ -178,33 +177,33 @@ seeImports = seeFromTcGblEnv tcg_rn_imports
 
 
 substitute :: HsExpr GhcPs -> HsExpr GhcPs
-substitute (HsVar a b)        = undefined
-substitute (HsUnboundVar a b) = undefined
-substitute (HsRecFld a b )     = undefined
-substitute (HsOverLabel a b)        = undefined
-substitute (HsIPVar a b)        = undefined
-substitute (HsOverLit a b )        = undefined
-substitute (HsLit a b )        = undefined
-substitute (HsLam a b )        = undefined
-substitute (HsLamCase a b) = undefined
-substitute (HsApp a b c) = undefined
-substitute (HsAppType a b c) = undefined
-substitute (OpApp a b c d) = undefined
-substitute (OpApp a b c d) = undefined
-substitute (NegApp a b c) = undefined
-substitute (HsPar a b) = undefined
-substitute (SectionL a b c) = undefined
-substitute (SectionR a b c) = undefined
+substitute (HsVar a b)           = undefined
+substitute (HsUnboundVar a b)    = undefined
+substitute (HsRecFld a b )       = undefined
+substitute (HsOverLabel a b)     = undefined
+substitute (HsIPVar a b)         = undefined
+substitute (HsOverLit a b )      = undefined
+substitute (HsLit a b )          = undefined
+substitute (HsLam a b )          = undefined
+substitute (HsLamCase a b)       = undefined
+substitute (HsApp a b c)         = undefined
+substitute (HsAppType a b c)     = undefined
+substitute (OpApp a b c d)       = undefined
+substitute (OpApp a b c d)       = undefined
+substitute (NegApp a b c)        = undefined
+substitute (HsPar a b)           = undefined
+substitute (SectionL a b c)      = undefined
+substitute (SectionR a b c)      = undefined
 substitute (ExplicitTuple a b c) = undefined
 substitute (ExplicitSum a b c d) = undefined
-substitute (HsCase a b c) = undefined
-substitute (HsIf a b c d) = undefined
-substitute (HsMultiIf a b) = undefined
-substitute (HsLet a b c) = undefined
-substitute (HsDo a b c) = undefined
-substitute (ExplicitList a b) = undefined
-substitute (RecordCon a b c) = undefined
-substitute (RecordUpd a b c) = undefined
-substitute (HsGetField a b c) = undefined
-substitute (HsProjection a b) = undefined
-substitute _ = undefined
+substitute (HsCase a b c)        = undefined
+substitute (HsIf a b c d)        = undefined
+substitute (HsMultiIf a b)       = undefined
+substitute (HsLet a b c)         = undefined
+substitute (HsDo a b c)          = undefined
+substitute (ExplicitList a b)    = undefined
+substitute (RecordCon a b c)     = undefined
+substitute (RecordUpd a b c)     = undefined
+substitute (HsGetField a b c)    = undefined
+substitute (HsProjection a b)    = undefined
+substitute _                     = undefined
